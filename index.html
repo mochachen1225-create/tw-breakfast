@@ -45,6 +45,31 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 #timer.hurry{background:var(--yolk);color:var(--ink);animation:pulse .6s infinite alternate}
 #lives{letter-spacing:-2px;white-space:nowrap;font-size:13px}
 #lives .gone{filter:grayscale(1);opacity:.35}
+.rival{flex:0 0 auto;display:flex;gap:10px;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;background:#2A2420;color:#fff;margin:0 -10px;padding:3px 12px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden}
+.rival b{color:var(--yolk)}
+.rival .off{opacity:.5}
+.modes{display:flex;flex-direction:column;gap:10px}
+.modeBtn{display:flex;align-items:center;gap:12px;text-align:left;background:var(--paper);border-radius:16px;padding:12px 14px;box-shadow:0 4px 0 #D8C3A5;border:3px solid transparent}
+.modeBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #D8C3A5}
+.modeBtn .mi{font-size:34px;line-height:1}
+.modeBtn b{display:block;font-family:var(--display);font-size:21px;color:var(--tomato)}
+.modeBtn small{font-size:12.5px;color:var(--ink-soft)}
+.codeIn{font-family:var(--display);font-size:44px;letter-spacing:.35em;text-align:center;width:100%;box-sizing:border-box;background:var(--paper);border:4px solid var(--wood);border-radius:16px;padding:6px 0 6px .35em;color:var(--ink);
+  -webkit-user-select:text;user-select:text;touch-action:auto}
+.codeIn:focus{outline:none;border-color:var(--tomato)}
+.seats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seat{background:var(--paper);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;gap:4px;align-items:center;min-height:86px;justify-content:center;box-shadow:inset 0 0 0 2px #E2C08D}
+.seat .sn{font-family:var(--display);font-size:16px;color:var(--ink);word-break:break-all}
+.seat .st{font-size:12px;font-weight:900;border-radius:999px;padding:1px 10px;background:#EDE3D3;color:var(--ink-soft)}
+.seat .st.ok{background:var(--scallion);color:#fff}
+.seat.empty{box-shadow:inset 0 0 0 2px #E2C08D;opacity:.7}
+.seat .you{font-size:11px;color:var(--tomato);font-weight:900}
+.countdown{font-family:var(--display);font-size:96px;color:var(--tomato);line-height:1;animation:hop .4s ease-out}
+.vsTable{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.vsTable th,.vsTable td{padding:5px 4px;border-bottom:1px dashed #E2C08D}
+.vsTable th{font-size:12px;color:var(--ink-soft)}
+.vsTable td:first-child{text-align:left;font-weight:700;color:var(--ink-soft)}
+.err{color:var(--tomato);font-weight:700;font-size:13px;min-height:1.2em}
 .iconbtn{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.18);font-size:15px;display:grid;place-items:center}
 
 /* ---------- 點單 ---------- */
@@ -262,6 +287,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
       <button class="iconbtn" id="pauseBtn" aria-label="暫停">Ⅱ</button>
     </div>
   </header>
+  <div class="rival" id="rival" hidden></div>
 
   <section class="front">
     <div class="say" id="bossSay"></div>
@@ -625,22 +651,27 @@ function freshState(){
   return {
     running:false, paused:false, over:false,
     gt:0, spawnT:.8, spawned:0, cid:0,
-    queue:[], pending:[], slots:[null,null], board:[null,null], tray:{egg:[],bacon:[],chop:[],chicken:[]}, sel:null, born:0,
+    queue:[], slots:[null,null], board:[null,null], tray:{egg:[],bacon:[],chop:[],chicken:[]}, sel:null, born:0,
     cups:Object.keys(DRINKS).map(type=>({type, level:0, sugar:'none', pouring:false, pid:null})),
     lives:LIVES, served:0, income:0, loss:0, freeCount:0, peeks:0, mistakes:0, lastFail:'wrong',
-    sinceUber:0, events:{uncle1:false, uncle2:false, uncle3:false, rush:false},
+    k:0, baseSeed:1, rush:false, mode:'solo', role:null, result:null, vsOver:null,
     lastFirst:null,
   };
 }
 
 /* ================= 帳本 ================= */
 function earn(n, label){ if (!n) return; S.income += n; floater(`+$${n}${label?' '+label:''}`); renderLedger(); }
-function lose(n, label){ if (!n) return; S.loss += n; floater(`-$${n}${label?' '+label:''}`, true); renderLedger(); }
+function lose(n, label){
+  if (!n) return;
+  if (isGuest()){ sendAct({k:'loss', n, lb:label||''}); return; }
+  S.loss += n; floater(`-$${n}${label?' '+label:''}`, true); renderLedger();
+}
 
 /* ================= 訂單 ================= */
 function newOrder(o={}){
-  const order = o.order || genOrder(S.gt);
-  const maxP = o.patience || (lerp(36, 24, S.gt/GAME_LEN) + order.length*8);
+  const tv = o.tv != null ? o.tv : S.gt;
+  const order = o.order || genOrder(tv);
+  const maxP = o.patience || (lerp(36, 24, tv/GAME_LEN) + order.length*8);
   S.spawned++;
   return {
     id:++S.cid, where: rand()<.45 ? '內用' : '外帶',
@@ -649,6 +680,28 @@ function newOrder(o={}){
   };
 }
 function spawn(c){ S.queue.push(c); renderTicket(); }
+// 第 k 張單：用 (種子, k) 決定內容，雙人比賽時兩邊拿到一模一樣的單
+function orderFor(k){
+  const save = seed;
+  seed = (S.baseSeed ^ Math.imul(k, 2654435761)) >>> 0; rand(); rand();
+  const tv = k * 14, coop = S.mode === 'coop';
+  let o;
+  if (k === 3) o = newOrder({type:'uncle', order:UNCLE_ORDER(), patience:55, tv});
+  else if (k === 10 || k === 17) o = newOrder({type:'uncle', order:UNCLE_ORDER(), patience:50, hidden:true, tv});
+  else if (k >= 4 && k % 4 === 0){
+    const n = Math.min(8, (tv < 150 ? ri(5,6) : ri(6,7)) + (coop ? 1 : 0));
+    o = newOrder({type:'uber', order:genOrder(tv, n), patience:lerp(80, 66, tv/GAME_LEN) + n*4, tv});
+  } else {
+    const ord = genOrder(tv);
+    if (coop && ord.length < 5) ord.push(randomItem(tv));
+    o = newOrder({order:ord, tv});
+  }
+  o.id = k;
+  if (coop){ o.maxP *= 1.15; o.p = o.maxP; }
+  if (tv > 80 && o.type !== 'uncle' && o.order.some(x=>x.kind==='main' && x.tops.length < 3) && rand() < .22) o.changeIn = rnd(3, 7);
+  seed = save;
+  return o;
+}
 
 function onFirstChanged(){
   const c = S.queue[0];
@@ -657,8 +710,7 @@ function onFirstChanged(){
   sfx.chime();
   const tk = $('#ticket'); tk.classList.remove('pop'); void tk.offsetWidth; tk.classList.add('pop');
   if (c.type === 'uncle' && !c.hidden) setTimeout(()=>custSay('常客阿伯：記住我點什麼喔！'), 600);
-  else if (S.gt > 80 && c.order.some((o,i)=>!c.done[i] && o.kind==='main' && o.tops.length < 3) && rand() < .22)
-    c.changeAt = S.gt + rnd(3, 7);
+  else if (c.changeIn) c.changeAt = S.gt + c.changeIn;
 }
 
 function orderTimeout(c){
@@ -674,16 +726,17 @@ function completeOrder(c){
   else if (c.p/c.maxP > .5) setTimeout(()=>earn(c.type === 'uber' ? 30 : 10, '小費'), 300);
   S.queue.shift();
   S.spawnT = .6;
-  sfx.cash();
+  sfx.cash(); fx({a:'snd', v:'cash'});
   bossSay(c.free ? '這單請客了…' : '出餐完成！');
   renderHUD(); renderTicket();
   if (S.served >= GOAL) endGame(true);
 }
 
 /* 出餐：交給目前這張單 */
-function deliver(item){
+function deliver(item, remote){
   const c = S.queue[0];
-  if (!c){ toast('還沒有訂單喔～'); return false; }
+  if (!c){ if (!remote) toast('還沒有訂單喔～'); return false; }
+  if (isGuest()){ sendAct({k:'d', it:[item.kind, item.type, item.tops, item.size||0, item.sugar||0]}); sfx.tick(); return true; }
   let best = -1, kind = null;
   c.order.forEach((o,i)=>{
     if (c.done[i]) return;
@@ -693,7 +746,7 @@ function deliver(item){
   });
   if (best >= 0){
     const want = c.order[best];
-    c.done[best] = true; sfx.ding();
+    c.done[best] = true; sfx.ding(); fx({a:'snd', v:'ding'});
     if (c.free) lose(costOf(item), '請客');
     else {
       c.earned += want.price; earn(want.price);
@@ -701,7 +754,8 @@ function deliver(item){
         const extra = item.price - want.price;
         setTimeout(()=>lose(extra, '給太多'), 250);
         sfx.meh();
-        toast(want.kind === 'drink' ? `做成大杯，只能收中杯的錢` : `多加了料，只能收原本的錢`);
+        const tm = want.kind === 'drink' ? `做成大杯，只能收中杯的錢` : `多加了料，只能收原本的錢`;
+        toast(tm); fx({a:'toast', x:tm});
       }
     }
     if (c.done.every(Boolean)) completeOrder(c); else renderTicket();
@@ -728,6 +782,7 @@ function deliver(item){
 /* ================= 失誤 ================= */
 let oopsT;
 function oops(kind, line, sub){
+  fx({a:'oops', k:kind, l:line, s:sub||''});
   const o = $('#oops');
   o.querySelector('.oe').innerHTML = mascot(kind);
   o.querySelector('.ol').textContent = line;
@@ -738,6 +793,7 @@ function oops(kind, line, sub){
 }
 function mistake(kind, line, sub){
   if (S.over) return;
+  if (isGuest()){ sendAct({k:'m', kind, l:line, sub:sub||''}); return; }
   S.lives--; S.mistakes++; S.lastFail = kind;
   sfx.buzz();
   if (navigator.vibrate) try { navigator.vibrate([80,40,80]); } catch(e){}
@@ -853,51 +909,41 @@ function loop(ts){
   requestAnimationFrame(loop);
 }
 function update(dt){
-  S.gt += dt;
-  const t = S.gt, E = S.events, P = S.pending;
+  if (!isGuest()) S.gt += dt;
+  const t = S.gt, guest = isGuest();
 
-  if (!E.uncle1 && S.spawned >= 2){ E.uncle1 = true; P.push(newOrder({type:'uncle', order:UNCLE_ORDER(), patience:55})); }
-  if (!E.uncle2 && t > 125){ E.uncle2 = true; P.push(newOrder({type:'uncle', order:UNCLE_ORDER(), patience:50, hidden:true})); }
-  if (!E.uncle3 && t > 235){ E.uncle3 = true; P.push(newOrder({type:'uncle', order:UNCLE_ORDER(), patience:46, hidden:true})); }
-  if (!E.rush && t > 200){ E.rush = true; toast('上班上課尖峰！訂單變大了'); }
-
-  // 一次一張單，完成才出下一張
-  if (!S.queue.length){
-    S.spawnT -= dt;
-    if (S.spawnT <= 0){
-      let c = P.shift();
-      if (!c){
-        S.sinceUber++;
-        if (t > 45 && (S.sinceUber >= 5 || (S.sinceUber >= 3 && rand() < .45))){
-          S.sinceUber = 0;
-          const n = t < 150 ? ri(5,6) : ri(6,7);
-          c = newOrder({type:'uber', order:genOrder(t, n), patience:lerp(80, 66, t/GAME_LEN) + n*4});
-        } else c = newOrder();
+  if (!guest){
+    if (!S.rush && t > 200){ S.rush = true; toast('上班上課尖峰！訂單變大了'); }
+    // 一次一張單，完成才出下一張
+    if (!S.queue.length){
+      S.spawnT -= dt;
+      if (S.spawnT <= 0){
+        const c = orderFor(++S.k);
+        if (c.type === 'uber') toast(`Uber 單來了！一次 ${c.order.length} 樣！`);
+        spawn(c);
       }
-      if (c.type === 'uber') toast(`Uber 單來了！一次 ${c.order.length} 樣！`);
-      spawn(c);
     }
-  }
-  for (const c of S.queue.slice()){
-    c.p -= dt;
-    if (c.p <= 0){ orderTimeout(c); if (S.over) return; }
-  }
-  // 改單
-  const f = S.queue[0];
-  if (f && f.changeAt && t >= f.changeAt){
-    f.changeAt = null;
-    const idx = f.order.findIndex((o,i)=>!f.done[i] && o.kind==='main' && o.tops.length < 3);
-    if (idx >= 0){
-      const o = f.order[idx];
-      const add = MAINS[o.type].fill.filter(x=>!o.tops.includes(x));
-      const top = pick(add);
-      f.order[idx] = makeItem('main', o.type, o.tops.concat(top));
-      f.order[idx].changed = true;
-      custSay(`改單！${MAINS[o.type].name}加${ING[top].name}！`); sfx.tick();
-      renderTicket();
+    for (const c of S.queue.slice()){
+      c.p -= dt;
+      if (c.p <= 0){ orderTimeout(c); if (S.over) return; }
     }
-  }
-  if (S.queue[0] !== S.lastFirst){ S.lastFirst = S.queue[0]; onFirstChanged(); }
+    // 改單
+    const f = S.queue[0];
+    if (f && f.changeAt && t >= f.changeAt){
+      f.changeAt = null;
+      const idx = f.order.findIndex((o,i)=>!f.done[i] && o.kind==='main' && o.tops.length < 3);
+      if (idx >= 0){
+        const o = f.order[idx];
+        const add = MAINS[o.type].fill.filter(x=>!o.tops.includes(x));
+        const top = add[(f.id * 7) % add.length];
+        f.order[idx] = makeItem('main', o.type, o.tops.concat(top));
+        f.order[idx].changed = true;
+        custSay(`改單！${MAINS[o.type].name}加${ING[top].name}！`); sfx.tick();
+        renderTicket();
+      }
+    }
+    if (S.queue[0] !== S.lastFirst){ S.lastFirst = S.queue[0]; onFirstChanged(); }
+  } else if (S.queue[0]) S.queue[0].p -= dt;
 
   // 煎台
   const win = lerp(6, 4, t/GAME_LEN);
@@ -940,7 +986,8 @@ function update(dt){
 
   paintPatience();
   renderTimer();
-  if (t >= GAME_LEN && !S.over) endGame(false, 'timeup');
+  netTick();
+  if (!guest && t >= GAME_LEN && !S.over) endGame(false, 'timeup');
 }
 
 /* ================= 畫面 ================= */
@@ -1112,8 +1159,10 @@ function renderTimer(){
 let toastT, bossT, custT, floatN = 0;
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 1400); }
 function bossSay(msg){ const b = $('#bossSay'); b.textContent = msg; b.classList.add('show'); clearTimeout(bossT); bossT = setTimeout(()=>b.classList.remove('show'), 1800); }
-function custSay(msg){ const b = $('#custSay'); b.textContent = msg; b.classList.add('show'); clearTimeout(custT); custT = setTimeout(()=>b.classList.remove('show'), 2400); }
+function custSay(msg){ fx({a:'say', x:msg}); custSay0(msg); }
+function custSay0(msg){ const b = $('#custSay'); b.textContent = msg; b.classList.add('show'); clearTimeout(custT); custT = setTimeout(()=>b.classList.remove('show'), 2400); }
 function floater(text, bad){
+  fx({a:'fl', x:text, b:bad?1:0});
   const f = document.createElement('div'); f.className = 'floater' + (bad ? ' bad' : ''); f.textContent = text;
   f.style.right = '20px'; f.style.top = (70 + (floatN++ % 3) * 22) + 'px';
   $('#app').appendChild(f); setTimeout(()=>f.remove(), 1100);
@@ -1142,13 +1191,15 @@ document.addEventListener('pointerdown', e => {
     case 'dump': { const c = S.cups[+v]; if (c.level >= 3) lose(5, '倒掉'); c.level = 0; c.sugar = 'none'; renderCup(+v); break; }
     case 'sugar': { const c = S.cups[+v]; c.sugar = SUGAR_ORDER[(SUGAR_ORDER.indexOf(c.sugar)+1) % 3]; sfx.tick(); renderCup(+v); break; }
     case 'pour': { const c = S.cups[+v]; c.pouring = true; c.pid = e.pointerId; renderCup(+v); break; }
-    case 'peek': {
-      const c = S.queue[0]; if (!c) break;
-      c.hidden = false; c.p -= c.maxP * .25; S.peeks++;
-      custSay(pickAny(LINES.peek)); renderTicket(); break;
-    }
+    case 'peek': doPeek(); break;
   }
 }, {passive:false});
+function doPeek(){
+  const c = S.queue[0]; if (!c || !c.hidden) return;
+  if (isGuest()){ sendAct({k:'peek'}); return; }
+  c.hidden = false; c.p -= c.maxP * .25; S.peeks++;
+  custSay(pickAny(LINES.peek)); renderTicket();
+}
 function stopPour(e){
   S && S.cups.forEach((c,i)=>{ if (c.pouring && c.pid === e.pointerId){ c.pouring = false; c.pid = null; renderCup(i); } });
 }
@@ -1160,6 +1211,19 @@ function showCard(html){ $('#card').innerHTML = html; $('#overlay').hidden = fal
 function hideCard(){ $('#overlay').hidden = true; }
 
 function esc(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function homeScreen(){
+  leaveRoom();
+  $('#rival').hidden = true;
+  showCard(`
+    <div class="mascot">${mascot('win')}</div>
+    <h1>早安！今天怎麼開店？</h1>
+    <div class="modes">
+      <button class="modeBtn" data-mode="solo"><span class="mi">🍳</span><span><b>單人開店</b><small>自己一個人顧店，五分鐘出 20 單</small></span></button>
+      <button class="modeBtn" data-mode="coop"><span class="mi">🤝</span><span><b>雙人合作</b><small>兩個人顧同一張單，誰出錯都扣全隊的</small></span></button>
+      <button class="modeBtn" data-mode="vs"><span class="mi">🆚</span><span><b>雙人比賽</b><small>一樣的訂單，先倒店的人就輸</small></span></button>
+    </div>`);
+  document.querySelectorAll('.modeBtn').forEach(b=>b.onclick = () => { sfx.init(); sfx.tick(); NET.mode = b.dataset.mode; startScreen(); });
+}
 function startScreen(){
   const presets = () => SHOP_NAMES.slice().sort(()=>Math.random()-.5).slice(0,6);
   showCard(`
@@ -1171,7 +1235,9 @@ function startScreen(){
     </div>
     <p style="font-size:12.5px;color:var(--ink-soft)">自己打店名，或從下面挑一個，也可以按骰子隨便抽</p>
     <div class="presets" id="presets"></div>
-    <button class="cta" id="nameOk">就叫這個名字！</button>`);
+    <button class="cta" id="nameOk">就叫這個名字！</button>
+    <button class="ghostbtn" id="homeBtn">回首頁</button>`);
+  $('#homeBtn').onclick = homeScreen;
   const input = $('#shopName'), prev = $('#signPreview'), box = $('#presets');
   const sync = () => { prev.textContent = input.value.trim() || '（還沒取名）'; box.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.textContent === input.value)); };
   const fill = () => { box.innerHTML = presets().map(n=>`<button>${esc(n)}</button>`).join(''); sync(); };
@@ -1189,7 +1255,7 @@ function startScreen(){
       if (++n >= 9){ clearInterval(iv); sfx.ding(); fill(); }
     }, 60);
   };
-  $('#nameOk').onclick = () => { setShopName(input.value); rulesScreen(); };
+  $('#nameOk').onclick = () => { setShopName(input.value); NET.mode === 'solo' ? rulesScreen() : codeScreen(); };
 }
 function rulesScreen(){
   showCard(`
@@ -1206,20 +1272,25 @@ function rulesScreen(){
     </ul>
     <button class="cta" id="startBtn">開店！</button>
     <button class="ghostbtn" id="backBtn">回去改店名</button>`);
-  $('#startBtn').onclick = startGame;
+  $('#startBtn').onclick = () => startGame();
   $('#backBtn').onclick = startScreen;
 }
-function startGame(){
+function startGame(opt={}){
   sfx.init();
   S = freshState(); seed = (Date.now() ^ 0x5f3759df) >>> 0;
+  S.mode = opt.mode || 'solo'; S.role = opt.role || null;
+  S.baseSeed = opt.seed || ((Math.random()*4294967296) >>> 0);
   S.running = true;
+  $('#pauseBtn').hidden = S.mode !== 'solo';
+  $('#rival').hidden = S.mode === 'solo';
+  if (S.mode !== 'solo') renderRival();
   sfx.bgmStart();
   S.slots.forEach((_,i)=>renderSlot(i)); S.board.forEach((_,i)=>renderBoard(i)); S.cups.forEach((_,i)=>renderCup(i)); renderTray();
   renderSel(); renderHUD(); renderTicket(); renderTimer(); renderLedger();
   hideCard();
 }
 function pause(on){
-  if (!S || !S.running || S.over) return;
+  if (!S || !S.running || S.over || S.mode !== 'solo') return;
   S.paused = on;
   sfx.sizzle(0); sfx.pour(false);
   if (on) sfx.bgmStop(); else sfx.bgmStart();
@@ -1227,7 +1298,7 @@ function pause(on){
   if (on){
     showCard(`<h2>休息一下</h2><p>煎台先關火，訂單也會等你。</p><button class="cta" id="resumeBtn">繼續營業</button><button class="ghostbtn" id="quitBtn">不開了，重新來</button>`);
     $('#resumeBtn').onclick = ()=>pause(false);
-    $('#quitBtn').onclick = ()=>{ S.over = true; sfx.bgmStop(); startScreen(); };
+    $('#quitBtn').onclick = ()=>{ S.over = true; sfx.bgmStop(); homeScreen(); };
   } else hideCard();
 }
 function getTitle(){
@@ -1242,26 +1313,306 @@ function getTitle(){
   if (m === 2) return ['九命怪貓店長','差點倒店，但店裡的貓保佑你活下來了。'];
   return ['帥哥美女早安認證店長','你的「早安」比你的蛋餅還有名。'];
 }
+function stopAll(){ S.over = true; S.running = false; sfx.sizzle(0); sfx.pour(false); sfx.bgmStop(); }
 function endGame(win, reason){
   if (S.over) return;
-  S.over = true; S.running = false;
-  sfx.sizzle(0); sfx.pour(false); sfx.bgmStop();
-  const mm = Math.floor(S.gt/60), ss = String(Math.floor(S.gt%60)).padStart(2,'0');
-  const net = S.income - S.loss;
-  const books = `<div class="books"><div>收入<b>$${S.income}</b></div><div>賠掉<b>$${S.loss}</b></div><div>淨賺<b style="color:${net<0?'var(--tomato)':'var(--scallion)'}">${net<0?'-':''}$${Math.abs(net)}</b></div></div>`;
-  const stats = `<div class="stat"><span>出餐 ${S.served}/${GOAL}</span><span>用時 ${mm}:${ss}</span><span>失誤 ${S.mistakes}</span></div>`;
-  if (win){
-    const [title, quip] = getTitle();
+  stopAll();
+  if (S.mode === 'vs'){ S.vsOver = win ? 'done' : (reason === 'timeup' ? 'time' : 'dead'); netTick(true); vsResolve(); return; }
+  const k = reason || S.lastFail;
+  const [title, quip] = win ? getTitle() : ['', ''];
+  const r = {win:win?1:0, k, line: win ? '' : pickAny(FAIL[k] || FAIL.wrong), title, quip,
+    inc:S.income, loss:S.loss, sv:S.served, gt:Math.round(S.gt), m:S.mistakes, shop:shopName};
+  if (S.mode === 'coop'){ S.result = r; netTick(true); }
+  showEnd(r);
+}
+function booksHTML(inc, loss){
+  const net = inc - loss;
+  return `<div class="books"><div>收入<b>$${inc}</b></div><div>賠掉<b>$${loss}</b></div><div>淨賺<b style="color:${net<0?'var(--tomato)':'var(--scallion)'}">${net<0?'-':''}$${Math.abs(net)}</b></div></div>`;
+}
+function endButtons(soloAgain, soloRename){
+  if (S.mode === 'solo') return `<button class="cta" id="againBtn">${soloAgain}</button><button class="ghostbtn" id="renameBtn">${soloRename}</button>`;
+  return `<button class="cta" id="againBtn">再來一局</button><button class="ghostbtn" id="renameBtn">離開房間</button>`;
+}
+function wireEndButtons(){
+  $('#againBtn').onclick = () => { if (S.mode === 'solo') startGame(); else { setReady(true); lobbyScreen(); } };
+  $('#renameBtn').onclick = () => { if (S.mode === 'solo') startScreen(); else homeScreen(); };
+}
+function showEnd(r){
+  const mm = Math.floor(r.gt/60), ss = String(Math.floor(r.gt%60)).padStart(2,'0');
+  const stats = `<div class="stat"><span>出餐 ${r.sv}/${GOAL}</span><span>用時 ${mm}:${ss}</span><span>失誤 ${r.m}</span></div>`;
+  const who = S.mode === 'coop' ? `「${esc(r.shop)}」團隊` : `「${esc(shopName)}」`;
+  if (r.win){
     sfx.win();
-    showCard(`<div class="mascot">${mascot('win')}</div><h2>「${esc(shopName)}」過關！</h2><p>老闆獲得封號</p><div class="titleBadge">${title}</div><p class="big">${quip}</p>${books}${stats}<button class="cta" id="againBtn">明天再開店</button><button class="ghostbtn" id="renameBtn">換個店名</button>`);
+    showCard(`<div class="mascot">${mascot('win')}</div><h2>${who}過關！</h2><p>${S.mode==='coop'?'兩位老闆':'老闆'}獲得封號</p><div class="titleBadge">${r.title}</div><p class="big">${r.quip}</p>${booksHTML(r.inc, r.loss)}${stats}${endButtons('明天再開店','換個店名')}`);
   } else {
-    const k = reason || S.lastFail;
-    const line = pickAny(FAIL[k] || FAIL.wrong);
     sfx.lose();
-    showCard(`<div class="mascot">${mascot(k==='timeup' ? 'leave' : 'lose')}</div><h2>「${esc(shopName)}」${k==='timeup'?'打烊了…':'倒店了…'}</h2><p class="big">${line}</p>${books}${stats}<button class="cta" id="againBtn">不服，再來</button><button class="ghostbtn" id="renameBtn">換個店名重開</button>`);
+    showCard(`<div class="mascot">${mascot(r.k==='timeup' ? 'leave' : 'lose')}</div><h2>${who}${r.k==='timeup'?'打烊了…':'倒店了…'}</h2><p class="big">${r.line}</p>${booksHTML(r.inc, r.loss)}${stats}${endButtons('不服，再來','換個店名重開')}`);
   }
-  $('#againBtn').onclick = startGame;
-  $('#renameBtn').onclick = startScreen;
+  wireEndButtons();
+}
+
+/* ================= 雙人：房間 ================= */
+// 只用 presence（每個人自己的狀態物件）同步，任何能打開這頁的人都能用
+const NET = {mode:'solo', lobby:null, room:null, code:'', me:null, rival:null, host:true, ready:false,
+  startId:null, counting:false, seq:0, acts:[], seenSeq:0, fx:[], fxN:0, lastFx:0, pubT:0, lastPub:'', rivalSt:null, lastQ:'', rivalGone:false};
+const isGuest = () => S && S.mode === 'coop' && S.role === 'guest';
+function fx(o){ if (!S || S.mode !== 'coop' || S.role !== 'host' || !S.running) return; o.n = ++NET.fxN; NET.fx.push(o); if (NET.fx.length > 8) NET.fx.shift(); }
+function sendAct(a){ a.s = ++NET.seq; NET.acts.push(a); if (NET.acts.length > 15) NET.acts.shift(); netTick(true); }
+function pres(patch){ if (NET.room) NET.room.presence(patch).catch(()=>{}); }
+function setReady(v){ NET.ready = v; NET.startSent = false; pres({ready:v, shop:shopName}); }
+async function getLobby(){
+  if (NET.lobby) return NET.lobby;
+  try { if (!window.claude || !window.claude.use) return null; NET.lobby = await window.claude.use('room'); } catch(e){ NET.lobby = null; }
+  return NET.lobby;
+}
+function leaveRoom(){
+  if (NET.room){ try { NET.room.leave(); } catch(e){} }
+  NET.room = null; NET.rival = null; NET.me = null; NET.ready = false; NET.counting = false; NET.startId = null;
+}
+function codeScreen(err){
+  const label = NET.mode === 'coop' ? '🤝 雙人合作' : '🆚 雙人比賽';
+  showCard(`
+    <h2>${label}</h2>
+    <p>兩個人輸入<b>同一組 4 位數字</b>，就會在同一場</p>
+    <input class="codeIn" id="codeIn" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" value="${esc(NET.code)}" aria-label="房號" autocomplete="off">
+    <button class="ghostbtn" id="genCode">幫我想一組數字</button>
+    <p class="err" id="codeErr">${err ? esc(err) : ''}</p>
+    <button class="cta" id="joinBtn">進入房間</button>
+    <button class="ghostbtn" id="homeBtn">回首頁</button>`);
+  const input = $('#codeIn');
+  input.addEventListener('pointerdown', e=>e.stopPropagation());
+  input.addEventListener('input', ()=>{ input.value = input.value.replace(/\D/g,'').slice(0,4); });
+  $('#genCode').onclick = () => { input.value = String(Math.floor(Math.random()*10000)).padStart(4,'0'); $('#codeErr').textContent = '把這組數字告訴朋友，請他也輸入一樣的'; };
+  $('#homeBtn').onclick = homeScreen;
+  $('#joinBtn').onclick = async () => {
+    const code = input.value;
+    if (!/^\d{4}$/.test(code)){ $('#codeErr').textContent = '請輸入 4 位數字'; return; }
+    NET.code = code;
+    $('#joinBtn').disabled = true; $('#codeErr').textContent = '連線中…';
+    const lobby = await getLobby();
+    if (!lobby){ codeScreen('這裡連不上雙人模式。請在 claude.ai 打開這個遊戲，朋友也要能打開這個網址（從右上角「分享」給他）。'); return; }
+    try {
+      leaveRoom();
+      const room = await lobby.join(`tw-${NET.mode}-${code}`);
+      NET.room = room;
+      room.onPeers(onPeers, e => { if (S.running && S.mode !== 'solo') toast('連線中斷了'); else codeScreen('連線中斷了，再試一次'); });
+      setReady(false);
+      lobbyScreen();
+    } catch(e){
+      codeScreen(e && e.code === 'not_permitted' ? '你的帳號沒辦法加入雙人房間，請確認朋友有把網址分享給你。' : '進不去房間，等一下再試一次');
+    }
+  };
+}
+function lobbyScreen(){
+  if (!NET.room){ codeScreen(); return; }
+  const label = NET.mode === 'coop' ? '🤝 雙人合作' : '🆚 雙人比賽';
+  const rule = NET.mode === 'coop'
+    ? '兩個人一起出同一張單，各自有自己的鍋子和飲料台。🍳 三次機會兩人共用，誰出錯都算，扣完一起倒店。單會比較大。'
+    : '兩邊的訂單一模一樣。誰先出錯 3 次倒店就輸；先出完 20 單的人贏；5 分鐘到了比出單數，一樣多再比淨賺。';
+  const me = NET.me, rv = NET.rival;
+  const seat = (p, you) => p
+    ? `<div class="seat">${you ? '<span class="you">你</span>' : ''}<span class="sn">${esc(String((p.presence && p.presence.shop) || '（還沒取名）').slice(0,10))}</span><span class="st ${p.presence && p.presence.ready ? 'ok' : ''}">${p.presence && p.presence.ready ? '準備好了' : '還沒準備'}</span></div>`
+    : `<div class="seat empty"><span class="sn">等朋友加入…</span><span class="st">房號 ${esc(NET.code)}</span></div>`;
+  showCard(`
+    <h2>${label}｜房號 ${esc(NET.code)}</h2>
+    <div class="seats">${seat(me || {presence:{shop:shopName, ready:NET.ready}}, true)}${NET.full ? '<div class="seat empty"><span class="sn">房間滿了</span></div>' : seat(rv, false)}</div>
+    <p style="font-size:13px;line-height:1.55;text-align:left">${rule}</p>
+    <p class="err">${NET.full ? '這個房號已經有兩個人了，換一組數字吧' : (!rv ? '把房號告訴朋友，請他選一樣的模式、輸入一樣的數字' : (NET.ready ? '等對方按準備…' : ''))}</p>
+    <button class="cta" id="readyBtn" ${NET.full ? 'disabled' : ''}>${NET.ready ? '取消準備' : '準備好了！'}</button>
+    <button class="ghostbtn" id="leaveBtn">離開房間</button>`);
+  $('#readyBtn').onclick = () => { sfx.init(); setReady(!NET.ready); lobbyScreen(); };
+  $('#leaveBtn').onclick = homeScreen;
+}
+function inLobby(){ return !!NET.room && !NET.counting && (!S.running || S.over) && !!$('#readyBtn'); }
+function onPeers(ch){
+  const all = ch.peers.filter(p => p.kind === 'viewer');
+  const me = all.find(p => p.sameTab);
+  if (!me) return;
+  const players = all.slice().sort((a,b) => a.peer < b.peer ? -1 : a.peer > b.peer ? 1 : 0);
+  const two = players.slice(0, 2);
+  NET.full = !two.includes(me);
+  const prevRival = NET.rival;
+  NET.me = me;
+  NET.rival = NET.full ? null : (two.find(p => p !== me) || null);
+  NET.host = !NET.rival || me.peer < NET.rival.peer;
+  const rv = NET.rival, rp = rv ? rv.presence || {} : {};
+  const hostP = NET.host ? me.presence || {} : rp;
+
+  // 開局：房主看到兩人都準備好，就丟出種子
+  if (NET.host && rv && NET.ready && rp.ready && !NET.counting && !NET.startSent && (!S.running || S.over)){
+    NET.startSent = true;
+    pres({start:{id:Math.random().toString(36).slice(2, 10), seed:(Math.random()*4294967296) >>> 0, a:me.peer, b:rv.peer}});
+  }
+  const st = hostP.start;
+  if (st && st.id && st.id !== NET.startId && rv && NET.ready && !NET.counting && (!S.running || S.over)
+      && [st.a, st.b].includes(me.peer) && [st.a, st.b].includes(rv.peer)){
+    NET.startId = st.id; countdown(st.seed);
+    return;
+  }
+
+  if (S.running && !S.over && S.mode !== 'solo'){
+    if (!rv && prevRival){ rivalLeft(); return; }
+    if (S.mode === 'vs'){
+      if (rp.st && rp.st.g === NET.startId){ NET.rivalSt = rp.st; checkVs(); }
+    } else if (S.role === 'host'){
+      const a = rp.acts;
+      if (a && a.g === NET.startId) hostProcess(a.a);
+    } else if (rp.cs && rp.cs.g === NET.startId) applyCS(rp.cs);
+    renderRival();
+  } else if (S.over && S.mode === 'vs' && S.vsOver === 'time' && rp.st && rp.st.g === NET.startId){
+    NET.rivalSt = rp.st; vsResolve();
+  } else if (S.over && S.mode === 'coop' && S.role === 'guest' && rp.cs && rp.cs.g === NET.startId){
+    // 已經結束，不用再處理
+  }
+  if (inLobby()) lobbyScreen();
+}
+function countdown(sd){
+  NET.counting = true;
+  NET.ready = false; pres({ready:false});
+  let n = 3;
+  const tick = () => {
+    if (n > 0){ showCard(`<p class="big">${NET.mode === 'coop' ? '一起開店！' : '準備比賽！'}</p><div class="countdown">${n}</div>`); sfx.tick(); n--; setTimeout(tick, 800); }
+    else {
+      NET.counting = false;
+      NET.vsShown = false; NET.startSent = false;
+      NET.seq = 0; NET.acts = []; NET.seenSeq = 0; NET.fx = []; NET.fxN = 0; NET.lastFx = 0; NET.rivalSt = null; NET.lastQ = ''; NET.lastPub = '';
+      startGame({mode:NET.mode, seed:sd, role: NET.mode === 'coop' ? (NET.host ? 'host' : 'guest') : null});
+      pres({cs:null, acts:null, st:null});
+    }
+  };
+  tick();
+}
+// 遊戲中把自己的狀態放進 presence（每秒約 8 次，有變才送）
+function netTick(force){
+  if (!NET.room || !S || S.mode === 'solo') return;
+  const now = performance.now();
+  if (!force && now - NET.pubT < 120) return;
+  let patch;
+  if (S.mode === 'vs') patch = {st:{g:NET.startId, sv:S.served, lv:S.lives, net:S.income - S.loss, over:S.vsOver || 0, shop:shopName}};
+  else if (S.role === 'host') patch = {cs:buildCS()};
+  else patch = {acts:{g:NET.startId, a:NET.acts}};
+  const j = JSON.stringify(patch);
+  if (j === NET.lastPub) return;
+  NET.lastPub = j; NET.pubT = now;
+  pres(patch);
+}
+function buildCS(){
+  const c = S.queue[0];
+  return {g:NET.startId, t:Math.round(S.gt*10)/10, sv:S.served, lv:S.lives, i:S.income, l:S.loss, shop:shopName,
+    q: c ? {id:c.id, ty:c.type, wh:c.where, hd:c.hidden?1:0, fr:c.free?1:0, p:Math.round(c.p*10)/10, mp:Math.round(c.maxP*10)/10,
+      o:c.order.map(o=>[o.kind, o.type, o.tops, o.size||0, o.sugar||0, o.changed?1:0]), d:c.done.map(x=>x?1:0)} : null,
+    fx:NET.fx, res:S.result || null};
+}
+function hostProcess(acts){
+  for (const a of acts || []){
+    if (!(a.s > NET.seenSeq)) continue;
+    NET.seenSeq = a.s;
+    if (S.over) continue;
+    if (a.k === 'd' && Array.isArray(a.it)){
+      const [kind, type, tops, size, sugar] = a.it;
+      if (!(MAINS[type] || SIDES[type] || DRINKS[type])) continue;
+      deliver(makeItem(kind, type, (tops||[]).filter(t=>ING[t]), size || undefined, sugar || undefined), true);
+    } else if (a.k === 'm' && OOPS_EMOJI_KINDS.includes(a.kind)) mistake(a.kind, String(a.l||'').slice(0,40), String(a.sub||'').slice(0,40));
+    else if (a.k === 'loss') lose(Math.max(0, Math.min(200, +a.n || 0)), String(a.lb||'').slice(0,6));
+    else if (a.k === 'peek') doPeek();
+  }
+}
+const OOPS_EMOJI_KINDS = ['wrong','burnt','spill','leave'];
+function applyCS(cs){
+  S.gt = cs.t || 0;
+  if (S.served !== cs.sv || S.lives !== cs.lv){ S.served = cs.sv; S.lives = cs.lv; renderHUD(); }
+  if (S.income !== cs.i || S.loss !== cs.l){ S.income = cs.i; S.loss = cs.l; renderLedger(); }
+  const q = cs.q;
+  const key = q ? JSON.stringify([q.id, q.hd, q.fr, q.o, q.d]) : '';
+  if (key !== NET.lastQ){
+    const prevId = S.queue[0] && S.queue[0].id;
+    NET.lastQ = key;
+    if (q){
+      const c = {id:q.id, type:q.ty, where:q.wh, hidden:!!q.hd, free:!!q.fr, p:q.p, maxP:q.mp,
+        order:q.o.map(a=>{ const it = makeItem(a[0], a[1], a[2], a[3] || undefined, a[4] || undefined); if (a[5]) it.changed = true; return it; }),
+        done:q.d.map(Boolean)};
+      S.queue = [c];
+      if (q.id !== prevId){ sfx.chime(); const tk = $('#ticket'); tk.classList.remove('pop'); void tk.offsetWidth; tk.classList.add('pop'); }
+    } else S.queue = [];
+    renderTicket();
+  } else if (q && S.queue[0]) S.queue[0].p = q.p;
+  for (const f of cs.fx || []){
+    if (!(f.n > NET.lastFx)) continue;
+    NET.lastFx = f.n;
+    if (f.a === 'oops'){
+      sfx.buzz();
+      if (navigator.vibrate) try { navigator.vibrate([80,40,80]); } catch(e){}
+      const fl = $('#flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on');
+      oops(f.k, f.l, f.s);
+    }
+    else if (f.a === 'fl') floater(f.x, f.b);
+    else if (f.a === 'say') custSay0(f.x);
+    else if (f.a === 'toast') toast(f.x);
+    else if (f.a === 'snd' && sfx[f.v]) sfx[f.v]();
+  }
+  if (cs.res && !S.over){ stopAll(); S.result = cs.res; showEnd(cs.res); }
+}
+function renderRival(){
+  const el = $('#rival');
+  if (!S || S.mode === 'solo'){ el.hidden = true; return; }
+  el.hidden = false;
+  const rv = NET.rival, rp = rv ? rv.presence || {} : null;
+  if (!rv){ el.innerHTML = `<span class="off">${S.mode === 'coop' ? '🤝 隊友離線了' : '🆚 對手離線了'}</span>`; return; }
+  if (S.mode === 'coop'){ el.innerHTML = `🤝 隊友：<b>${esc(String(rp.shop || '').slice(0,10))}</b>　${NET.host ? '你是房主' : '單子由房主出'}`; return; }
+  const st = NET.rivalSt;
+  if (!st){ el.innerHTML = `🆚 <b>${esc(String(rp.shop || '對手').slice(0,10))}</b>　準備中…`; return; }
+  let lv = ''; for (let i=0;i<LIVES;i++) lv += i < st.lv ? '🍳' : '<span class="off">🍳</span>';
+  el.innerHTML = `🆚 <b>${esc(String(st.shop || rp.shop || '對手').slice(0,10))}</b><span>${st.sv}/${GOAL}</span><span>${lv}</span><span>${st.net < 0 ? '-' : ''}$${Math.abs(st.net)}</span>`;
+}
+function rivalLeft(){
+  renderRival();
+  if (S.mode === 'vs'){ toast('對手離開了，你自己繼續玩'); return; }
+  if (S.role === 'host'){ toast('隊友離開了，你一個人撐下去！'); return; }
+  stopAll();
+  showCard(`<div class="mascot">${mascot('leave')}</div><h2>房主離開了</h2><p class="big">這局先到這裡，訂單都在房主那邊。</p><button class="cta" id="againBtn">回到房間</button><button class="ghostbtn" id="renameBtn">回首頁</button>`);
+  $('#againBtn').onclick = lobbyScreen; $('#renameBtn').onclick = homeScreen;
+}
+// 比賽：對手倒店或先完成，馬上結束
+function checkVs(){
+  const o = NET.rivalSt && NET.rivalSt.over;
+  if (S.over || !o) return;
+  if (o === 'dead'){ stopAll(); S.vsOver = 'rivaldead'; netTick(true); vsResolve(); }
+  else if (o === 'done'){ stopAll(); S.vsOver = 'rivaldone'; netTick(true); vsResolve(); }
+}
+function vsResolve(){
+  if (NET.vsShown) return;
+  const me = S.vsOver, rv = NET.rivalSt, ro = rv && rv.over;
+  let win = null, why = '';
+  if (me === 'dead'){ win = false; why = '你先出錯 3 次，倒店了…'; }
+  else if (me === 'done'){ win = true; why = '你先出完 20 單！'; }
+  else if (me === 'rivaldead'){ win = true; why = '對手先倒店了！你撐到最後！'; }
+  else if (me === 'rivaldone'){ win = false; why = '對手先出完 20 單了…'; }
+  else if (me === 'time'){
+    if (!NET.rival || !rv){ win = true; why = '時間到，對手不在了'; }
+    else if (ro === 'dead'){ win = true; why = '對手先倒店了！'; }
+    else if (ro === 'done'){ win = false; why = '對手先出完 20 單了…'; }
+    else if (ro !== 'time'){
+      showCard(`<div class="mascot">${mascot('leave')}</div><h2>打烊了！</h2><p class="big">等對手結算…</p>`); return;
+    } else {
+      const myNet = S.income - S.loss;
+      if (S.served !== rv.sv){ win = S.served > rv.sv; why = `時間到，比出單數：${S.served} 對 ${rv.sv}`; }
+      else if (myNet !== rv.net){ win = myNet > rv.net; why = `出單一樣多，比淨賺：$${myNet} 對 $${rv.net}`; }
+      else { win = null; why = '出單和淨賺都一樣，平手！'; }
+    }
+  }
+  const r = rv || {sv:'-', net:0, lv:'-', shop:'對手'};
+  const myNet = S.income - S.loss;
+  const row = (k, a, b) => `<tr><td>${k}</td><td>${a}</td><td>${b}</td></tr>`;
+  const money = n => (n < 0 ? '-$' : '$') + Math.abs(n);
+  NET.vsShown = true;
+  if (win === true) sfx.win(); else if (win === false) sfx.lose();
+  showCard(`<div class="mascot">${mascot(win === false ? 'lose' : 'win')}</div>
+    <h2>${win === true ? '你贏了！' : win === false ? '你輸了…' : '平手！'}</h2>
+    <p class="big">${why}</p>
+    <table class="vsTable"><tr><th></th><th>你｜${esc(shopName)}</th><th>對手｜${esc(String(r.shop||'對手').slice(0,10))}</th></tr>
+      ${row('出單', `${S.served}/${GOAL}`, `${r.sv}/${GOAL}`)}${row('淨賺', money(myNet), money(r.net||0))}${row('剩下 🍳', S.lives, r.lv)}</table>
+    ${endButtons('','')}`);
+  wireEndButtons();
 }
 
 $('#pauseBtn').onclick = () => pause(!(S && S.paused));
@@ -1269,7 +1620,7 @@ $('#muteBtn').onclick = () => {
   soundOn = !soundOn; sfx.mute(soundOn);
   $('#muteBtn').textContent = soundOn ? '🔊' : '🔇';
 };
-document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && S && S.mode === 'solo') pause(true); });
 
 /* ================= 啟動 ================= */
 S = freshState();
@@ -1277,7 +1628,7 @@ setShopName(shopName);
 buildKitchen();
 S.slots.forEach((_,i)=>renderSlot(i)); S.board.forEach((_,i)=>renderBoard(i)); S.cups.forEach((_,i)=>renderCup(i)); renderTray();
 renderHUD(); renderTicket(); renderTimer(); renderLedger();
-startScreen();
+homeScreen();
 requestAnimationFrame(loop);
 })();
 </script>
