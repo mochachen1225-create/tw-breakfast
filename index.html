@@ -71,6 +71,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .tk-items{display:flex;flex-wrap:wrap;gap:4px 12px;align-content:flex-start}
 .tk-item{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:700;line-height:1.15}
 .tk-item .pr{color:var(--ink-soft);font-size:11px;margin-left:3px;font-variant-numeric:tabular-nums}
+.tk-item small.sg{display:inline-block;border-radius:4px;padding:0 4px;color:var(--ink);box-shadow:inset 0 0 0 1px #E2C08D}
 .tk-item small{display:block;font-weight:700;color:var(--tomato-dk);font-size:11.5px}
 .tk-item.done{opacity:.4;text-decoration:line-through}
 .tk-item.changed{animation:flashBg 1s 3}
@@ -164,6 +165,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .cup.pouring{transform:scale(.97)}
 .cup.spill .glass{animation:shake .3s}
 .drinkName{font-weight:900;font-size:12px}
+.sugar{width:100%;border-radius:999px;font-weight:900;font-size:11.5px;min-height:24px;box-shadow:inset 0 0 0 2px #E2C08D,0 2px 0 #D8C3A5;color:var(--ink)}
 .cupBtns{display:flex;gap:3px;width:100%}
 .cupBtns button{flex:1;border-radius:7px;font-weight:900;font-size:11.5px;min-height:28px;background:var(--paper);box-shadow:0 2px 0 #D8C3A5}
 .cupBtns .send{background:var(--scallion);color:#fff;box-shadow:0 2px 0 #3E7525}
@@ -331,9 +333,12 @@ const DRINKS = {
   ricemilk:{name:'米漿',color:'#C9A479'},
   coffee:  {name:'咖啡',color:'#6B4A33'},
 };
+const SUGARS = { none:{name:'無糖',color:'#FFFFFF'}, half:{name:'半糖',color:'#FFE9A8'}, full:{name:'全糖',color:'#F6B93B'} };
+const SUGAR_ORDER = ['none','half','full'];
 const SIZES = { M:{name:'中',lo:50,hi:66,price:20}, L:{name:'大',lo:80,hi:99,price:25} };
-const SHOP_NAMES = ['帥哥美女早餐店','七貓早餐店','蛋餅研究所','大冰奶續命站','肉鬆加好加滿','早安燈燈燈','阿姨我要一份','起司牽絲很長',
-  '睡飽再來早餐','蛋餅不會飛','鐵板麵很鐵','加蛋不加價','早起的蟲蟲','漢堡不漢堡','奶茶微微甜'];
+const SHOP_NAMES = ['蛋定早餐店','堡你滿意','堡持聯絡','鮪你而生','肉鬆一下','荷包蛋滿滿','餅氣凝神','餅餅有禮',
+  '吐司你了','蛋蛋的哀傷','饅饅來','饅頭大汗','起司不起來','米漿糊塗','豆漿好陽光','呷飽未早餐店','金厚呷早餐','哩賀早餐店',
+  '帥哥美女早餐店','七貓早餐店'];
 
 const cookOf = t => (MAINS[t] && MAINS[t].cook) || (SIDES[t] && SIDES[t].cook) || (ING[t] && ING[t].cook);
 const nameOf = t => (MAINS[t]||SIDES[t]||ING[t]||DRINKS[t]).name;
@@ -392,7 +397,7 @@ function foodSVG(type, tops){
 }
 
 /* ================= 餐點 ================= */
-function makeItem(kind, type, tops, size){
+function makeItem(kind, type, tops, size, sugar){
   tops = (tops||[]).slice();
   let label, sub = '', price;
   if (kind === 'main'){
@@ -405,8 +410,9 @@ function makeItem(kind, type, tops, size){
   } else {
     price = SIZES[size] ? SIZES[size].price : 0;
     label = (SIZES[size] ? SIZES[size].name : '怪') + '杯' + DRINKS[type].name;
+    sub = SUGARS[sugar] ? SUGARS[sugar].name : '';
   }
-  return {kind, type, tops, size, label, sub, price};
+  return {kind, type, tops, size, sugar, label, sub, price};
 }
 const costOf = it => Math.max(3, Math.round(it.price * COST_RATE));
 
@@ -414,6 +420,7 @@ const costOf = it => Math.max(3, Math.round(it.price * COST_RATE));
 function compare(want, made){
   if (want.kind !== made.kind || want.type !== made.type) return null;
   if (want.kind === 'drink'){
+    if (made.sugar !== want.sugar) return 'under';
     if (made.size === want.size) return 'exact';
     return (want.size === 'M' && made.size === 'L') ? 'over' : 'under';
   }
@@ -438,7 +445,7 @@ function randomItem(t){
     const lo = k === 'egg_pancake' ? 0 : 1;
     return makeItem('main', k, pickFill(k, ri(lo, Math.max(lo,hi))));
   }
-  if (k === 'drink') return makeItem('drink', pick(Object.keys(DRINKS)), [], rand()<.5?'M':'L');
+  if (k === 'drink') return makeItem('drink', pick(Object.keys(DRINKS)), [], rand()<.5?'M':'L', pick(SUGAR_ORDER));
   if (k === 'noodle') return makeItem('side','noodle',[rand()<.5?'pepper':'mush']);
   return makeItem('side', k, []);
 }
@@ -448,13 +455,14 @@ function genOrder(t, n){
   while (items.length < n) items.push(randomItem(t));
   return items;
 }
-const UNCLE_ORDER = () => [makeItem('main','riceball',['youtiao','radishd']), makeItem('side','radish'), makeItem('drink','ricemilk',[],'L')];
+const UNCLE_ORDER = () => [makeItem('main','riceball',['youtiao','radishd']), makeItem('side','radish'), makeItem('drink','ricemilk',[],'L','half')];
 
 /* ================= 台詞 ================= */
 const LINES = {
   wrongDetail:['咦？好像少了什麼料耶…','這是…老闆的隱藏版嗎？','料好像跑錯盤了～','我點的料去哪裡旅行了？'],
   wrongItem:['這個…好像沒有點耶？','哇～是招待嗎？謝謝老闆！','這份是不是要給隔壁桌的？'],
   wrongDrink:['說好的大杯呢？','這杯的量…有點藝術','這杯是要給螞蟻喝的嗎？'],
+  wrongSugar:['這杯甜到牙齒在跳舞','我說的甜度去哪了？','喝一口，螞蟻都搬過來了','這杯是給減肥的人喝的嗎？'],
   burnt:['煎到可以當暖暖包了','焦香味飄到隔壁去了','黑金限定版，不賣'],
   spill:['飲料在櫃台上開派對','櫃台說它喝飽了','拖把：又是我？'],
   leave:['訂單等到睡著了','客人先去上班了，下次見～','訂單：我自己走就好'],
@@ -604,7 +612,7 @@ function freshState(){
     running:false, paused:false, over:false,
     gt:0, spawnT:.8, spawned:0, cid:0,
     queue:[], pending:[], slots:[null,null,null,null,null,null], board:[null,null], sel:null, born:0,
-    cups:Object.keys(DRINKS).map(type=>({type, level:0, pouring:false, pid:null})),
+    cups:Object.keys(DRINKS).map(type=>({type, level:0, sugar:'none', pouring:false, pid:null})),
     lives:LIVES, served:0, income:0, loss:0, freeCount:0, peeks:0, mistakes:0, lastFail:'wrong',
     sinceUber:0, events:{uncle1:false, uncle2:false, uncle3:false, rush:false},
     lastFirst:null,
@@ -688,7 +696,9 @@ function deliver(item){
   // 送錯或少給
   const sameType = c.order.some((o,i)=>!c.done[i] && o.type === item.type);
   let line;
-  if (item.kind === 'drink' && sameType) line = pickAny(LINES.wrongDrink);
+  const sugarOff = item.kind === 'drink' && c.order.some((o,i)=>!c.done[i] && o.type === item.type && o.sugar !== item.sugar && (o.size === item.size || (o.size==='M' && item.size==='L')));
+  if (sugarOff) line = pickAny(LINES.wrongSugar);
+  else if (item.kind === 'drink' && sameType) line = pickAny(LINES.wrongDrink);
   else line = pickAny(sameType ? LINES.wrongDetail : LINES.wrongItem);
   let sub = '這單就請客吧';
   if (!c.free && c.earned){ S.income -= c.earned; S.loss += c.earned; sub = `這單改請客（退 $${c.earned}）`; c.earned = 0; }
@@ -810,7 +820,7 @@ function sizeOf(level){
 function serveCup(i){
   const c = S.cups[i];
   if (c.level < 3 || c.pouring) return;
-  if (deliver(makeItem('drink', c.type, [], sizeOf(c.level)))){ c.level = 0; renderCup(i); }
+  if (deliver(makeItem('drink', c.type, [], sizeOf(c.level), c.sugar))){ c.level = 0; c.sugar = 'none'; renderCup(i); }
 }
 
 /* ================= 主迴圈 ================= */
@@ -945,10 +955,11 @@ function buildKitchen(){
         <div class="nozzle" style="background:${d.color}"></div>
       </div>
       <div class="drinkName">${d.name}</div>
+      <button class="sugar" data-act="sugar" data-v="${i}">無糖</button>
       <div class="cupBtns"><button class="send" data-act="send" data-v="${i}" disabled>送</button><button data-act="dump" data-v="${i}" disabled aria-label="倒掉">倒</button></div>
     </div>`).join('');
   document.querySelectorAll('.station').forEach((st,i)=>{
-    cupEls[i] = {cup:st.querySelector('.cup'), liq:st.querySelector('.liq'), send:st.querySelector('.send'), dump:st.querySelector('[data-act=dump]')};
+    cupEls[i] = {sugar:st.querySelector('.sugar'), cup:st.querySelector('.cup'), liq:st.querySelector('.liq'), send:st.querySelector('.send'), dump:st.querySelector('[data-act=dump]')};
   });
 }
 function renderSlot(i){
@@ -997,6 +1008,8 @@ function renderCup(i){
   E.cup.style.setProperty('--lv', c.level + '%');
   E.cup.classList.toggle('pouring', c.pouring);
   E.send.disabled = E.dump.disabled = c.level < 3 || c.pouring;
+  E.sugar.textContent = SUGARS[c.sugar].name;
+  E.sugar.style.background = SUGARS[c.sugar].color;
 }
 
 function itemMini(o){ return `<span class="mini">${foodSVG(o.type, o.kind==='main' && o.type!=='egg_pancake' ? [] : o.tops)}</span>`; }
@@ -1010,7 +1023,7 @@ function renderTicket(){
   if (c.hidden){
     tk.innerHTML = head + `<div class="secret" data-act="peek"><b>「老樣子！」</b><small>想不起來？點這裡偷看（會扣時間）</small></div>`;
   } else {
-    tk.innerHTML = head + `<div class="tk-items">${c.order.map((o,i)=>`<div class="tk-item ${c.done[i]?'done':''} ${o.changed?'changed':''}">${itemMini(o)}<span>${o.label}<span class="pr">$${o.price}</span>${o.sub?`<small>${o.sub}</small>`:''}</span></div>`).join('')}</div>${c.free ? '<div class="free">免費</div>' : ''}`;
+    tk.innerHTML = head + `<div class="tk-items">${c.order.map((o,i)=>`<div class="tk-item ${c.done[i]?'done':''} ${o.changed?'changed':''}">${itemMini(o)}<span>${o.label}<span class="pr">$${o.price}</span>${o.sub?(o.kind==='drink'?`<small class="sg" style="background:${SUGARS[o.sugar].color}">${o.sub}</small>`:`<small>${o.sub}</small>`):''}</span></div>`).join('')}</div>${c.free ? '<div class="free">免費</div>' : ''}`;
   }
   paintPatience();
 }
@@ -1073,7 +1086,8 @@ document.addEventListener('pointerdown', e => {
     case 'bsend': sendBoard(+v); break;
     case 'btoss': tossBoard(+v); break;
     case 'send': serveCup(+v); break;
-    case 'dump': { const c = S.cups[+v]; if (c.level >= 3) lose(5, '倒掉'); c.level = 0; renderCup(+v); break; }
+    case 'dump': { const c = S.cups[+v]; if (c.level >= 3) lose(5, '倒掉'); c.level = 0; c.sugar = 'none'; renderCup(+v); break; }
+    case 'sugar': { const c = S.cups[+v]; c.sugar = SUGAR_ORDER[(SUGAR_ORDER.indexOf(c.sugar)+1) % 3]; sfx.tick(); renderCup(+v); break; }
     case 'pour': { const c = S.cups[+v]; c.pouring = true; c.pid = e.pointerId; renderCup(+v); break; }
     case 'peek': {
       const c = S.queue[0]; if (!c) break;
@@ -1133,7 +1147,7 @@ function rulesScreen(){
       <li><b>蛋餅</b>：蛋餅皮放上煎台，再點料加上去，煎好點一下出餐</li>
       <li><b>三明治、漢堡、飯糰</b>：放到工作台，加料後按「送」</li>
       <li>有 🔥 的料要先煎，熟了點一下就夾去配</li>
-      <li><b>按住杯子</b>倒飲料，停在中杯或大杯的線之間</li>
+      <li><b>按住杯子</b>倒飲料，停在中杯或大杯的線之間；點杯子下面的按鈕切換<b>無糖／半糖／全糖</b></li>
       <li>給多了（中杯做成大杯、多加料）只收原本的錢；<b>給少了就變免費</b></li>
       <li>送錯、燒焦、溢出、超時 <b>3 次就倒店</b></li>
     </ul>
