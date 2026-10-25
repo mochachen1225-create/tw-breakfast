@@ -47,21 +47,19 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .iconbtn{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.18);font-size:15px;display:grid;place-items:center}
 
 /* ---------- 店門口 ---------- */
-.front{flex:0 0 auto;height:34%;min-height:200px;display:flex;flex-direction:column;position:relative;padding-top:6px;gap:6px}
-.firstRow{flex:1 1 auto;display:grid;grid-template-columns:96px 1fr;gap:8px;min-height:0}
-.firstCust{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;position:relative}
-.face{font-size:52px;line-height:1;transition:transform .2s}
-.face.small{font-size:30px}
-.firstCust .face{animation:hop .35s ease-out}
-.firstCust.mad .face{animation:shake .3s}
-.pbar{width:80px;height:7px;border-radius:4px;background:rgba(59,42,32,.15);overflow:hidden}
+.front{flex:0 0 auto;display:flex;flex-direction:column;position:relative;padding-top:8px;gap:6px}
+.pbar{width:70px;height:6px;border-radius:4px;background:rgba(59,42,32,.15);overflow:hidden;flex:0 0 auto}
 .pbar i{display:block;height:100%;width:100%;background:var(--scallion);border-radius:4px;transform-origin:left}
 .tag{font-size:11px;font-weight:700;color:var(--ink-soft)}
-.ticket{background:var(--paper);border-radius:6px;box-shadow:0 2px 0 rgba(59,42,32,.15);padding:6px 8px;overflow:hidden;
-  display:flex;flex-direction:column;gap:3px;position:relative;
-  background-image:repeating-linear-gradient(transparent 0 25px,rgba(228,87,46,.12) 25px 26px)}
-.tk-head{font-family:var(--display);font-size:13px;color:var(--tomato);display:flex;justify-content:space-between}
-.tk-items{display:flex;flex-wrap:wrap;gap:4px 10px;align-content:flex-start;overflow:hidden}
+.ticket{background:var(--paper);border-radius:16px;box-shadow:0 3px 0 rgba(59,42,32,.15);padding:6px 10px 8px;
+  display:flex;flex-direction:column;gap:4px;position:relative;min-height:74px;box-sizing:border-box}
+.ticket::after{content:"";position:absolute;left:22px;bottom:-9px;border:9px solid transparent;border-bottom:0;border-top-color:var(--paper)}
+.ticket.pop{animation:hop .3s ease-out}
+.ticket.mad{animation:shake .3s}
+.tk-head{font-family:var(--display);font-size:13px;color:var(--tomato);display:flex;align-items:center;gap:8px}
+.tk-head .who{font-size:16px}
+.tk-head .cnt{margin-left:auto;color:var(--ink-soft)}
+.tk-items{display:flex;flex-wrap:wrap;gap:4px 12px;align-content:flex-start}
 .tk-item{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:700;line-height:1.15}
 .tk-item small{display:block;font-weight:500;color:var(--tomato-dk);font-size:11px}
 .tk-item.done{opacity:.4;text-decoration:line-through}
@@ -70,52 +68,53 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .mini svg{width:24px;height:24px}
 .free{position:absolute;right:6px;bottom:4px;transform:rotate(-14deg);border:3px solid var(--tomato);color:var(--tomato);
   font-family:var(--display);font-size:20px;padding:0 6px;border-radius:6px;opacity:.85}
-.secret{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:4px;cursor:pointer}
-.secret b{font-family:var(--display);font-size:24px;color:var(--tomato)}
+.secret{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px;cursor:pointer}
+.secret b{font-family:var(--display);font-size:20px;color:var(--tomato)}
 .secret small{font-size:11px;color:var(--ink-soft)}
 .waiting{margin:auto;color:var(--ink-soft);font-size:13px}
 
-.queue{flex:0 0 auto;display:flex;gap:6px;min-height:62px}
-.qc{flex:1 1 0;min-width:0;background:rgba(255,255,255,.55);border-radius:10px;padding:4px;display:flex;align-items:center;gap:4px}
-.qc .bub{display:flex;flex-wrap:wrap;gap:2px;flex:1;min-width:0}
+.queue{flex:0 0 auto;display:flex;gap:6px;min-height:40px;margin-top:4px}
+.qc{flex:1 1 0;min-width:0;background:rgba(255,255,255,.7);border-radius:12px;padding:4px 6px;display:flex;flex-direction:column;gap:3px;justify-content:center}
+.qc .bub{display:flex;flex-wrap:wrap;gap:2px;min-width:0}
 .qc .bub .mini{width:20px;height:20px}
 .qc .bub .mini svg{width:17px;height:17px}
-.qc .pbar{width:100%;height:4px;margin-top:2px}
-.qc .col{display:flex;flex-direction:column;align-items:center;width:34px}
+.qc .bub b{font-size:12px;color:var(--tomato)}
+.qc .pbar{width:100%;height:3px}
 .qc.ghost{background:transparent;border:2px dashed rgba(59,42,32,.12)}
 .counter{height:12px;margin:0 -10px;background:var(--wood);border-top:3px solid #B97F45;box-shadow:inset 0 -3px 0 #C48C52}
 
 .say{position:absolute;z-index:5;background:#fff;border-radius:12px;padding:5px 10px;font-weight:900;font-size:14px;
   box-shadow:0 3px 0 rgba(59,42,32,.18);white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
 .say.show{opacity:1;transform:none}
-#bossSay{left:100px;top:-2px;background:var(--yolk);color:var(--ink)}
-#custSay{left:4px;top:-2px;background:var(--tomato);color:#fff;max-width:92%;white-space:normal}
+#bossSay{right:4px;top:-4px;background:var(--yolk);color:var(--ink)}
+#custSay{right:6px;top:30px;background:var(--tomato);color:#fff;max-width:70%;white-space:normal}
 
 /* ---------- 廚房 ---------- */
-.kitchen{flex:1 1 auto;display:flex;flex-direction:column;gap:6px;padding:6px 0 max(8px,env(safe-area-inset-bottom,0px));min-height:0}
+.kitchen{flex:1 1 auto;display:flex;flex-direction:column;gap:6px;padding:8px 0 max(8px,env(safe-area-inset-bottom,0px));min-height:0}
 .label{font-family:var(--display);font-size:12px;color:var(--ink-soft);letter-spacing:.08em}
-.grill{background:linear-gradient(#4A505A,var(--steel));border-radius:12px;padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+.grill{flex:1 1 0;min-height:200px;background:linear-gradient(#4A505A,var(--steel));border-radius:14px;padding:10px;display:grid;
+  grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px 14px;place-items:center;
   box-shadow:inset 0 0 0 2px #23272d,0 4px 0 #23272d;position:relative}
 .grill.hot{box-shadow:inset 0 0 0 2px #23272d,inset 0 0 22px rgba(246,120,40,.35),0 4px 0 #23272d}
-.slot{aspect-ratio:1;position:relative;border-radius:50%;background:var(--steel-dk);display:grid;place-items:center;max-width:100%}
+.slot{height:100%;max-height:100%;aspect-ratio:1;max-width:100%;min-height:0;position:relative;border-radius:50%;background:var(--steel-dk);display:grid;place-items:center;box-sizing:border-box}
 .slot .ring{position:absolute;inset:-3px;border-radius:50%;
   background:conic-gradient(var(--rc,var(--yolk)) calc(var(--p,0)*1turn),transparent 0);
-  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));
-          mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px))}
-.slot .food{width:84%;height:84%;transition:transform .1s}
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));
+          mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px))}
+.slot .food{width:82%;height:82%;transition:transform .1s;display:grid;place-items:center}
 .slot .food svg{width:100%;height:100%;display:block}
 .slot.sel{box-shadow:0 0 0 3px var(--paper)}
 .slot.ready .food{animation:bob .5s infinite alternate}
 .slot.warn .ring{animation:blink .25s infinite alternate}
-.slot .empty{color:rgba(255,255,255,.18);font-size:11px;font-weight:700}
-.slot .toss{position:absolute;right:-4px;top:-4px;width:22px;height:22px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:12px;font-weight:900;
+.slot .empty{color:rgba(255,255,255,.2);font-size:14px;font-weight:700}
+.slot .toss{position:absolute;right:2%;top:2%;width:28px;height:28px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:12px;font-weight:900;
   box-shadow:0 2px 0 rgba(0,0,0,.3);display:none;place-items:center}
 .slot.has .toss{display:grid}
 .slot .smoke{position:absolute;inset:0;pointer-events:none}
-.slot .smoke.on::before,.slot .smoke.on::after{content:"💨";position:absolute;left:30%;top:10%;font-size:22px;animation:rise 1.2s ease-out infinite}
+.slot .smoke.on::before,.slot .smoke.on::after{content:"💨";position:absolute;left:30%;top:10%;font-size:30px;animation:rise 1.2s ease-out infinite}
 .slot .smoke.on::after{left:55%;animation-delay:.4s}
-.slot .tops{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);display:flex;gap:1px}
-.slot .tops b{font-size:9px;background:var(--paper);color:var(--ink);border-radius:4px;padding:0 3px;white-space:nowrap}
+.slot .tops{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);display:flex;gap:2px}
+.slot .tops b{font-size:11px;background:var(--paper);color:var(--ink);border-radius:4px;padding:0 3px;white-space:nowrap}
 
 .starters{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
 .btn{background:var(--paper);border-radius:10px;box-shadow:0 3px 0 #D8C3A5;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -130,10 +129,10 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .chip.press,.chip:active{transform:translateY(2px);box-shadow:0 1px 0 #D8C3A5}
 .shake{animation:shake .3s}
 
-.bar{flex:1 1 auto;display:grid;grid-template-columns:1fr 64px;gap:6px;min-height:0}
+.bar{flex:0 0 auto;display:grid;grid-template-columns:1fr 64px;gap:6px}
 .cups{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;min-height:0}
 .station{display:flex;flex-direction:column;align-items:center;gap:3px;min-height:0}
-.cup{position:relative;width:100%;flex:1 1 auto;min-height:70px;max-height:130px;touch-action:none}
+.cup{position:relative;width:100%;height:clamp(64px,12vh,100px);touch-action:none}
 .cup .glass{position:absolute;inset:0;clip-path:polygon(6% 0,94% 0,80% 100%,20% 100%);background:rgba(255,255,255,.75);
   box-shadow:inset 0 0 0 2px rgba(0,0,0,.1)}
 .cup .liq{position:absolute;left:0;right:0;bottom:0;height:0}
@@ -184,7 +183,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 @keyframes floatUp{to{transform:translateY(-40px);opacity:0}}
 @keyframes flashBg{50%{background:var(--yolk)}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
-@media (max-height:640px){.front{height:31%;min-height:180px}.face{font-size:42px}.btn{min-height:40px}.btn svg{width:24px;height:24px}.chip{min-height:30px}}
+@media (max-height:700px){.grill{min-height:110px}.kitchen{gap:5px;padding-top:6px}.cup{height:56px}.starters .btn span{font-size:11px}.btn{min-height:40px}.btn svg{width:24px;height:24px}.chip{min-height:30px}}
 </style>
 </head>
 <body>
@@ -203,10 +202,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
   <section class="front" id="front">
     <div class="say" id="bossSay"></div>
     <div class="say" id="custSay"></div>
-    <div class="firstRow">
-      <div class="firstCust" id="firstCust"></div>
-      <div class="ticket" id="ticket"></div>
-    </div>
+    <div class="ticket" id="ticket"></div>
     <div class="queue" id="queue"></div>
     <div class="counter"></div>
   </section>
@@ -273,8 +269,6 @@ const DRINKS = {
 };
 const SIZES = { M:{name:'中',lo:50,hi:66,price:20}, L:{name:'大',lo:80,hi:95,price:25} };
 const SHELF = { sandwich:{name:'三明治',price:35}, riceball:{name:'飯糰',price:40} };
-const FACES_M = ['👨','🧔','👴','👦','👨‍💼','👷‍♂️','👨‍🎓','🧑‍🦲'];
-const FACES_F = ['👩','👵','👧','👩‍💼','👱‍♀️','👩‍🎓','👩‍🦱','🧕'];
 
 /* ================= 扁平風食物插圖（SVG） ================= */
 function topSVG(id){
@@ -426,6 +420,10 @@ const sfx = (() => {
     pourG = ac.createGain(); pourG.gain.value = 0;
     s2.connect(lp).connect(pourG).connect(master); s2.start();
   }
+  const bgm = {on:false, next:0, step:0};
+  const MELODY = [76,0,79,0,81,79,76,0, 74,0,76,79,76,0,74,0, 72,0,74,0,76,79,81,0, 79,76,74,0,72,0,0,0];
+  const BASS = [48,43,45,43];
+  const midi = n => 440 * Math.pow(2, (n-69)/12);
   function tone(f, dur, type='sine', vol=.18, delay=0, slide){
     if (!ac) return;
     const t0 = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
@@ -447,24 +445,26 @@ const sfx = (() => {
     buzz(){ tone(150,.38,'sawtooth',.2,0,90); },
     win(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,.25,'triangle',.18,i*.11)); },
     lose(){ [392,330,262,196].forEach((f,i)=>tone(f,.3,'sawtooth',.12,i*.18)); },
+    chime(){ tone(1046,.14,'triangle',.2); tone(1318,.14,'triangle',.2,.11); tone(1568,.3,'triangle',.22,.22); },
+    bgmStart(){ if (!ac) return; bgm.on = true; bgm.step = 0; bgm.next = ac.currentTime + .1; },
+    bgmStop(){ bgm.on = false; },
+    bgmTick(bpm){
+      if (!ac || !bgm.on) return;
+      const step = 60 / bpm / 2;
+      while (bgm.next < ac.currentTime + .15){
+        const i = bgm.step % 32, when = bgm.next - ac.currentTime;
+        const m = MELODY[i];
+        if (m) tone(midi(m), step*.9, 'square', .035, when);
+        if (i % 4 === 0){
+          const root = BASS[Math.floor(i/8)];
+          tone(midi(i % 8 === 0 ? root : root + 7), step*1.6, 'triangle', .1, when);
+        }
+        if (i % 2 === 1) tone(5000, .02, 'square', .012, when);   // 鍋鏟敲擊感
+        bgm.next += step; bgm.step++;
+      }
+    },
   };
 })();
-let voices = [];
-function loadVoices(){ try { voices = speechSynthesis.getVoices(); } catch(e){} }
-if ('speechSynthesis' in window){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
-function speak(text, pitch=1.1, rate=1.18){
-  if (!soundOn || !('speechSynthesis' in window)) return;
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'zh-TW';
-    const v = voices.find(v=>/zh[-_]TW/i.test(v.lang)) || voices.find(v=>/zh[-_](HK|Hant)/i.test(v.lang)) || voices.find(v=>/^zh/i.test(v.lang));
-    if (v) u.voice = v;
-    u.pitch = pitch; u.rate = rate;
-    speechSynthesis.speak(u);
-  } catch(e){}
-}
-
 /* ================= 遊戲狀態 ================= */
 let S;
 function freshState(){
@@ -486,7 +486,7 @@ function newCustomer(o={}){
   const maxP = o.patience || (lerp(46, 28, S.gt/GAME_LEN) + order.length*7);
   S.spawned++;
   return {
-    id:++S.cid, gender, face:o.face || pick(gender==='m'?FACES_M:FACES_F),
+    id:++S.cid, gender,
     order, done:order.map(()=>false), p:maxP, maxP,
     type:o.type||'normal', hidden:!!o.hidden, free:false, greeted:false, changeAt:null,
   };
@@ -500,7 +500,8 @@ function onFirstChanged(){
   let line;
   if (c.type === 'delivery') line = '外送小哥早！單子給我！';
   else line = (c.gender==='m' ? '帥哥' : '美女') + '早安！要吃什麼？';
-  bossSay(line); speak(line, 1.15);
+  bossSay(line); sfx.chime();
+  const tk = $('#ticket'); tk.classList.remove('pop'); void tk.offsetWidth; tk.classList.add('pop');
   if (c.type === 'uncle' && c.hidden) setTimeout(()=>custSay('老樣子！'), 900);
   else if (c.type === 'uncle') setTimeout(()=>custSay('我常客喔，記住我點什麼！'), 900);
   else if (S.gt > 80 && c.order.some((o,i)=>!c.done[i] && o.type==='egg_pancake' && o.tops.length < 3) && rand() < .22)
@@ -510,7 +511,7 @@ function onFirstChanged(){
 function customerLeaves(c){
   S.queue.splice(S.queue.indexOf(c), 1);
   custSay(pickAny(LINES.leave));
-  mistake('leave', `${c.face} 等太久走掉了`);
+  mistake('leave', `${whoOf(c)}等太久走掉了`);
   renderFront();
 }
 
@@ -543,8 +544,8 @@ function deliver(item){
   if (item.kind === 'drink' && sameType) line = pickAny(LINES.wrongDrink);
   else line = pickAny(sameType ? LINES.wrongDetail : LINES.wrongItem);
   c.free = true;
-  custSay(line); speak(line, 1.5, 1.3);
-  $('#firstCust').classList.remove('mad'); void $('#firstCust').offsetWidth; $('#firstCust').classList.add('mad');
+  custSay(line);
+  const tk = $('#ticket'); tk.classList.remove('mad'); void tk.offsetWidth; tk.classList.add('mad');
   mistake('wrong');
   renderTicket();
   return true;
@@ -625,11 +626,11 @@ function update(dt){
 
   // 特殊事件
   const E = S.events;
-  if (!E.uncle1 && S.spawned >= 2 && t > 12){ E.uncle1 = true; spawn(newCustomer({type:'uncle', gender:'m', face:'👴', order:UNCLE_ORDER(), patience:60})); }
-  if (!E.uncle2 && t > 125){ E.uncle2 = true; spawn(newCustomer({type:'uncle', gender:'m', face:'👴', order:UNCLE_ORDER(), patience:55, hidden:true})); }
-  if (!E.uncle3 && t > 235){ E.uncle3 = true; spawn(newCustomer({type:'uncle', gender:'m', face:'👴', order:UNCLE_ORDER(), patience:50, hidden:true})); }
-  if (!E.deliv1 && t > 150){ E.deliv1 = true; spawn(newCustomer({type:'delivery', gender:'m', face:'🛵', order:genOrder(t,4), patience:75})); toast('外送單來了！4 樣！'); }
-  if (!E.deliv2 && t > 250){ E.deliv2 = true; spawn(newCustomer({type:'delivery', gender:'m', face:'🛵', order:genOrder(t,4), patience:70})); toast('又一張外送單！'); }
+  if (!E.uncle1 && S.spawned >= 2 && t > 12){ E.uncle1 = true; spawn(newCustomer({type:'uncle', gender:'m', order:UNCLE_ORDER(), patience:60})); }
+  if (!E.uncle2 && t > 125){ E.uncle2 = true; spawn(newCustomer({type:'uncle', gender:'m', order:UNCLE_ORDER(), patience:55, hidden:true})); }
+  if (!E.uncle3 && t > 235){ E.uncle3 = true; spawn(newCustomer({type:'uncle', gender:'m', order:UNCLE_ORDER(), patience:50, hidden:true})); }
+  if (!E.deliv1 && t > 150){ E.deliv1 = true; spawn(newCustomer({type:'delivery', gender:'m', order:genOrder(t,4), patience:75})); toast('外送單來了！4 樣！'); }
+  if (!E.deliv2 && t > 250){ E.deliv2 = true; spawn(newCustomer({type:'delivery', gender:'m', order:genOrder(t,4), patience:70})); toast('又一張外送單！'); }
   if (!E.rush && t > 200){ E.rush = true; toast('上班上課尖峰來了！'); }
 
   // 來客
@@ -656,7 +657,7 @@ function update(dt){
       f.order[idx] = makeItem('grill','egg_pancake', f.order[idx].tops.concat(top));
       f.order[idx].changed = true;
       const line = `啊等等！蛋餅加${TOPS[top].name}！`;
-      custSay(line); speak(line, 1.4, 1.25);
+      custSay(line); sfx.tick();
       renderTicket();
     }
   }
@@ -697,6 +698,7 @@ function update(dt){
     renderCup(i);
   });
   sfx.pour(pouring);
+  sfx.bgmTick(lerp(118, 158, t/GAME_LEN));
 
   paintPatience();
   renderTimer();
@@ -774,19 +776,11 @@ function renderCup(i){
 }
 
 function itemMini(o){ return `<span class="mini">${foodSVG(o.type, o.tops)}</span>`; }
+function whoOf(c){ return c.type==='delivery' ? '外送小哥' : c.type==='uncle' ? '常客阿伯' : (c.gender==='m'?'帥哥':'美女'); }
 function renderFront(){
-  const c = S.queue[0];
-  const fc = $('#firstCust');
-  if (c){
-    const name = c.type==='delivery' ? '外送小哥' : c.type==='uncle' ? '常客阿伯' : (c.gender==='m'?'帥哥':'美女');
-    if (fc.dataset.id != c.id){
-      fc.dataset.id = c.id;
-      fc.innerHTML = `<div class="face">${c.face}</div><div class="tag">${name}</div><div class="pbar"><i></i></div>`;
-    }
-  } else { fc.dataset.id = ''; fc.innerHTML = ''; }
   renderTicket();
   const rest = S.queue.slice(1, 4);
-  let html = rest.map(q=>`<div class="qc" data-id="${q.id}"><div class="col"><div class="face small">${q.face}</div><div class="pbar"><i></i></div></div><div class="bub">${q.hidden ? '<b style="font-size:12px">老樣子</b>' : q.order.map(itemMini).join('')}</div></div>`).join('');
+  let html = rest.map(q=>`<div class="qc"><div class="bub">${q.hidden ? '<b>老樣子</b>' : q.order.map(itemMini).join('')}</div><div class="pbar"><i></i></div></div>`).join('');
   for (let k=rest.length;k<3;k++) html += '<div class="qc ghost"></div>';
   $('#queue').innerHTML = html;
   paintPatience();
@@ -794,17 +788,16 @@ function renderFront(){
 function renderTicket(){
   const c = S.queue[0], tk = $('#ticket');
   if (!c){ tk.innerHTML = '<div class="waiting">等客人中…</div>'; return; }
+  const head = `<div class="tk-head"><span class="who">${whoOf(c)}</span><div class="pbar"><i></i></div><span class="cnt">${c.hidden ? '' : c.done.filter(Boolean).length+'/'+c.order.length}</span></div>`;
   if (c.hidden){
-    tk.innerHTML = `<div class="secret" data-act="peek"><b>「老樣子！」</b><small>想不起來？點這裡偷看（阿伯會不爽）</small></div>`;
-    return;
+    tk.innerHTML = head + `<div class="secret" data-act="peek"><b>「老樣子！」</b><small>想不起來？點這裡偷看（阿伯會不爽）</small></div>`;
+  } else {
+    tk.innerHTML = head + `<div class="tk-items">${c.order.map((o,i)=>`<div class="tk-item ${c.done[i]?'done':''} ${o.changed?'changed':''}">${itemMini(o)}<span>${o.label}${o.sub?`<small>${o.sub}</small>`:''}</span></div>`).join('')}</div>${c.free ? '<div class="free">免費</div>' : ''}`;
   }
-  const head = c.type==='delivery' ? '外送單' : c.type==='uncle' ? '常客' : '內用';
-  tk.innerHTML = `<div class="tk-head"><span>${head} #${String(c.id).padStart(3,'0')}</span><span>${c.done.filter(Boolean).length}/${c.order.length}</span></div>
-    <div class="tk-items">${c.order.map((o,i)=>`<div class="tk-item ${c.done[i]?'done':''} ${o.changed?'changed':''}">${itemMini(o)}<span>${o.label}${o.sub?`<small>${o.sub}</small>`:''}</span></div>`).join('')}</div>
-    ${c.free ? '<div class="free">免費</div>' : ''}`;
+  paintPatience();
 }
 function paintPatience(){
-  const bars = [document.querySelector('#firstCust .pbar i'), ...document.querySelectorAll('#queue .qc:not(.ghost) .pbar i')];
+  const bars = [document.querySelector('#ticket .pbar i'), ...document.querySelectorAll('#queue .qc:not(.ghost) .pbar i')];
   S.queue.slice(0,4).forEach((c,k)=>{
     const b = bars[k]; if (!b) return;
     const r = clamp01(c.p / c.maxP);
@@ -832,7 +825,7 @@ function custSay(msg){ const b = $('#custSay'); b.textContent = msg; b.classList
 function floater(text, sad){
   const f = document.createElement('div'); f.className = 'floater'; f.textContent = text;
   if (sad) f.style.color = 'var(--tomato)';
-  f.style.left = '110px'; f.style.top = '90px';
+  f.style.left = '45%'; f.style.top = '70px';
   $('#app').appendChild(f); setTimeout(()=>f.remove(), 1000);
 }
 function shakeEl(el){ if (!el) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
@@ -890,11 +883,11 @@ function startScreen(){
 }
 function startGame(){
   sfx.init();
-  speak('開店囉！', 1.1);
   const keepSound = soundOn;
   S = freshState(); seed = (Date.now() ^ 0x5f3759df) >>> 0;
   soundOn = keepSound;
   S.running = true;
+  sfx.bgmStart();
   S.slots.forEach((_,i)=>renderSlot(i)); S.cups.forEach((_,i)=>renderCup(i));
   renderSelection(); renderHUD(); renderFront(); renderTimer();
   hideCard();
@@ -903,11 +896,12 @@ function pause(on){
   if (!S || !S.running || S.over) return;
   S.paused = on;
   sfx.sizzle(0); sfx.pour(false);
+  if (on) sfx.bgmStop(); else sfx.bgmStart();
   S.cups.forEach((c,i)=>{ c.pouring = false; renderCup(i); });
   if (on){
     showCard(`<h2>休息一下</h2><p>客人會等你，煎台也先關火。</p><button class="cta" id="resumeBtn">繼續營業</button><button class="ghostbtn" id="quitBtn">不開了，重新來</button>`);
     $('#resumeBtn').onclick = ()=>pause(false);
-    $('#quitBtn').onclick = ()=>{ S.over = true; startScreen(); };
+    $('#quitBtn').onclick = ()=>{ S.over = true; sfx.bgmStop(); startScreen(); };
   } else hideCard();
 }
 function getTitle(){
@@ -923,17 +917,17 @@ function getTitle(){
 function endGame(win, reason){
   if (S.over) return;
   S.over = true; S.running = false;
-  sfx.sizzle(0); sfx.pour(false);
+  sfx.sizzle(0); sfx.pour(false); sfx.bgmStop();
   const mm = Math.floor(S.gt/60), ss = String(Math.floor(S.gt%60)).padStart(2,'0');
   const stats = `<div class="stat"><span>出餐 ${S.served}/${GOAL}</span><span>用時 ${mm}:${ss}</span><span>失誤 ${S.mistakes}</span><span>營收 $${S.money}</span></div>`;
   if (win){
     const [title, quip] = getTitle();
-    sfx.win(); speak('恭喜！你是' + title, 1.1);
+    sfx.win();
     showCard(`<h2>過關！</h2><p>你獲得封號</p><div class="titleBadge">${title}</div><p class="big">${quip}</p>${stats}<button class="cta" id="againBtn">再開一次店</button>`);
   } else {
     const k = reason || S.lastFail;
     const line = pickAny(FAIL[k] || FAIL.wrong);
-    sfx.lose(); speak(line, 1, 1.1);
+    sfx.lose();
     showCard(`<h2>${k==='timeup'?'打烊了…':'倒店了…'}</h2><p class="big">${line}</p>${stats}<button class="cta" id="againBtn">不服，再來</button>`);
   }
   $('#againBtn').onclick = startGame;
@@ -943,7 +937,6 @@ $('#pauseBtn').onclick = () => pause(!(S && S.paused));
 $('#muteBtn').onclick = () => {
   soundOn = !soundOn; sfx.mute(soundOn);
   $('#muteBtn').textContent = soundOn ? '🔊' : '🔇';
-  if (!soundOn && 'speechSynthesis' in window) try { speechSynthesis.cancel(); } catch(e){}
 };
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
 
