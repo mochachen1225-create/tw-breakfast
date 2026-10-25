@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@500;700;900&display=swap">
 <style>
-/* Layout: one phone screen, top = 店門口 (客人+點單), bottom = 廚房 (煎台/配料/飲料). 單一主題：早餐店招牌風 */
+/* Layout: 一個手機畫面。上 = 點單＋帳本，下 = 廚房（煎台 / 工作台 / 食材 / 飲料）。單一主題：早餐店招牌風 */
 :root{
   --cream:#FFF4E0;      /* 牆面 */
   --paper:#FFFDF7;      /* 點單紙 */
@@ -19,7 +19,8 @@
   --scallion:#5FA33E;   /* 蔥花綠 */
   --steel:#3A3F47;      /* 煎台/盤子 */
   --steel-dk:#2A2E35;
-  --wood:#D9A066;       /* 櫃台 */
+  --wood:#D9A066;       /* 櫃台、砧板 */
+  --wood-dk:#B97F45;
   --ink:#3B2A20;        /* 文字 */
   --ink-soft:#7A6455;
   --display:"Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
@@ -35,58 +36,50 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 #app{height:100%;display:flex;flex-direction:column;max-width:520px;margin:0 auto;position:relative;
   padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));box-sizing:border-box}
 
-/* ---------- HUD 招牌 ---------- */
+/* ---------- 招牌 ---------- */
 .hud{flex:0 0 auto;display:flex;align-items:center;gap:8px;background:var(--tomato);color:#fff;
   margin:0 -10px;padding:6px 12px;border-bottom:4px solid var(--tomato-dk)}
-.sign{font-family:var(--display);font-size:15px;letter-spacing:.06em;white-space:nowrap;text-shadow:0 2px 0 var(--tomato-dk)}
-.stats{margin-left:auto;display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;font-weight:700;font-size:14px}
+.sign{font-family:var(--display);font-size:15px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-shadow:0 2px 0 var(--tomato-dk)}
+.stats{margin-left:auto;display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;flex:0 0 auto}
 .pill{background:rgba(0,0,0,.18);border-radius:999px;padding:2px 8px;white-space:nowrap}
-#money{background:var(--yolk);color:var(--ink)}
-#money.bump{animation:pulse .15s 2 alternate}
 #timer.hurry{background:var(--yolk);color:var(--ink);animation:pulse .6s infinite alternate}
 #lives{letter-spacing:-2px;white-space:nowrap;font-size:13px}
 #lives .gone{filter:grayscale(1);opacity:.35}
 .iconbtn{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.18);font-size:15px;display:grid;place-items:center}
 
-/* ---------- 店門口 ---------- */
-.front{flex:0 0 auto;display:flex;flex-direction:column;position:relative;padding-top:8px;gap:6px}
-.pbar{width:70px;height:6px;border-radius:4px;background:rgba(59,42,32,.15);overflow:hidden;flex:0 0 auto}
+/* ---------- 點單 ---------- */
+.front{flex:0 0 auto;display:flex;flex-direction:column;position:relative;padding-top:8px;gap:5px}
+.pbar{height:8px;border-radius:4px;background:rgba(59,42,32,.15);overflow:hidden;flex:1}
 .pbar i{display:block;height:100%;width:100%;background:var(--scallion);border-radius:4px;transform-origin:left}
-.tag{font-size:11px;font-weight:700;color:var(--ink-soft)}
-.ticket{background:var(--paper);border-radius:6px;box-shadow:0 3px 0 rgba(59,42,32,.15);padding:8px 10px 10px;
-  display:flex;flex-direction:column;gap:6px;position:relative;min-height:96px;box-sizing:border-box;
+.ticket{background:var(--paper);border-radius:6px;box-shadow:0 3px 0 rgba(59,42,32,.15);padding:6px 10px 8px;
+  display:flex;flex-direction:column;gap:5px;position:relative;min-height:82px;box-sizing:border-box;
   border-top:6px dashed var(--cream);background-image:repeating-linear-gradient(transparent 0 27px,rgba(228,87,46,.10) 27px 28px)}
 .ticket.pop{animation:hop .3s ease-out}
 .ticket.mad{animation:shake .3s}
 .tk-head{font-family:var(--display);font-size:13px;color:var(--tomato);display:flex;align-items:center;gap:8px}
 .tk-head .who{font-size:16px}
-.tk-head .pbar{flex:1;width:auto;height:8px}
 .tk-head .sum{color:var(--ink);font-variant-numeric:tabular-nums}
-.tk-head .cnt{margin-left:auto;color:var(--ink-soft)}
 .tk-items{display:flex;flex-wrap:wrap;gap:4px 12px;align-content:flex-start}
 .tk-item{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:700;line-height:1.15}
-.tk-item .pr{color:var(--ink-soft);font-size:11px;font-weight:700;margin-left:2px;font-variant-numeric:tabular-nums}
-.tk-item small{display:block;font-weight:500;color:var(--tomato-dk);font-size:11px}
+.tk-item .pr{color:var(--ink-soft);font-size:11px;margin-left:3px;font-variant-numeric:tabular-nums}
+.tk-item small{display:block;font-weight:700;color:var(--tomato-dk);font-size:11.5px}
 .tk-item.done{opacity:.4;text-decoration:line-through}
 .tk-item.changed{animation:flashBg 1s 3}
 .mini{width:30px;height:30px;border-radius:50%;background:var(--steel);display:grid;place-items:center;flex:0 0 auto}
 .mini svg{width:24px;height:24px}
-.free{position:absolute;right:6px;bottom:4px;transform:rotate(-14deg);border:3px solid var(--tomato);color:var(--tomato);
+.free{position:absolute;right:8px;bottom:6px;transform:rotate(-14deg);border:3px solid var(--tomato);color:var(--tomato);
   font-family:var(--display);font-size:20px;padding:0 6px;border-radius:6px;opacity:.85}
 .secret{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px;cursor:pointer}
 .secret b{font-family:var(--display);font-size:20px;color:var(--tomato)}
 .secret small{font-size:11px;color:var(--ink-soft)}
 .waiting{margin:auto;color:var(--ink-soft);font-size:13px}
-
-.queue{flex:0 0 auto;display:flex;gap:6px;min-height:40px;margin-top:4px}
-.qc{flex:1 1 0;min-width:0;background:rgba(255,255,255,.7);border-radius:12px;padding:4px 6px;display:flex;flex-direction:column;gap:3px;justify-content:center}
-.qc .bub{display:flex;flex-wrap:wrap;gap:2px;min-width:0}
-.qc .bub .mini{width:20px;height:20px}
-.qc .bub .mini svg{width:17px;height:17px}
-.qc .bub b{font-size:12px;color:var(--tomato)}
-.qc .pbar{width:100%;height:3px}
-.qc.ghost{background:transparent;border:2px dashed rgba(59,42,32,.12)}
-.counter{height:12px;margin:0 -10px;background:var(--wood);border-top:3px solid #B97F45;box-shadow:inset 0 -3px 0 #C48C52}
+.ledger{display:flex;gap:10px;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--ink-soft);font-variant-numeric:tabular-nums;padding:0 2px}
+.ledger b{font-size:14px}
+.ledger .in b{color:var(--scallion)}
+.ledger .out b{color:var(--tomato)}
+.ledger .net{background:var(--yolk);color:var(--ink);border-radius:999px;padding:0 10px}
+.ledger .net.neg{background:var(--tomato);color:#fff}
+.ledger .bump{animation:pulse .15s 2 alternate}
 
 .say{position:absolute;z-index:5;background:#fff;border-radius:12px;padding:5px 10px;font-weight:900;font-size:14px;
   box-shadow:0 3px 0 rgba(59,42,32,.18);white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
@@ -95,65 +88,77 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 #custSay{right:6px;top:30px;background:var(--tomato);color:#fff;max-width:70%;white-space:normal}
 
 /* ---------- 廚房 ---------- */
-.kitchen{flex:1 1 auto;display:flex;flex-direction:column;gap:6px;padding:8px 0 max(8px,env(safe-area-inset-bottom,0px));min-height:0}
-.label{font-family:var(--display);font-size:12px;color:var(--ink-soft);letter-spacing:.08em}
-.grill{flex:1 1 0;min-height:200px;background:linear-gradient(#4A505A,var(--steel));border-radius:14px;padding:10px;display:grid;
-  grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px 14px;place-items:center;
+.kitchen{flex:1 1 auto;display:flex;flex-direction:column;gap:6px;padding:6px 0 max(8px,env(safe-area-inset-bottom,0px));min-height:0}
+.grill{flex:1 1 0;min-height:150px;background:linear-gradient(#4A505A,var(--steel));border-radius:14px;padding:8px;display:grid;
+  grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:8px;place-items:center;
   box-shadow:inset 0 0 0 2px #23272d,0 4px 0 #23272d;position:relative}
 .grill.hot{box-shadow:inset 0 0 0 2px #23272d,inset 0 0 22px rgba(246,120,40,.35),0 4px 0 #23272d}
 .slot{height:100%;max-height:100%;aspect-ratio:1;max-width:100%;min-height:0;position:relative;border-radius:50%;background:var(--steel-dk);display:grid;place-items:center;box-sizing:border-box}
 .slot .ring{position:absolute;inset:-3px;border-radius:50%;
   background:conic-gradient(var(--rc,var(--yolk)) calc(var(--p,0)*1turn),transparent 0);
-  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));
-          mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px))}
-.slot .food{width:82%;height:82%;transition:transform .1s;display:grid;place-items:center}
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));
+          mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px))}
+.slot .food{width:80%;height:80%;display:grid;place-items:center}
 .slot .food svg{width:100%;height:100%;display:block}
-.slot.sel{box-shadow:0 0 0 3px var(--paper)}
+.slot.sel{box-shadow:0 0 0 3px var(--paper),0 0 0 6px var(--yolk)}
 .slot.ready .food{animation:bob .5s infinite alternate}
 .slot.warn .ring{animation:blink .25s infinite alternate}
-.slot .empty{color:rgba(255,255,255,.2);font-size:14px;font-weight:700}
-.slot .toss{position:absolute;right:2%;top:2%;width:28px;height:28px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:12px;font-weight:900;
+.slot .empty{color:rgba(255,255,255,.2);font-size:13px;font-weight:700}
+.slot .toss{position:absolute;right:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:11px;font-weight:900;
   box-shadow:0 2px 0 rgba(0,0,0,.3);display:none;place-items:center}
 .slot.has .toss{display:grid}
 .slot .smoke{position:absolute;inset:0;pointer-events:none}
-.slot .smoke.on::before,.slot .smoke.on::after{content:"💨";position:absolute;left:30%;top:10%;font-size:30px;animation:rise 1.2s ease-out infinite}
+.slot .smoke.on::before,.slot .smoke.on::after{content:"💨";position:absolute;left:30%;top:10%;font-size:26px;animation:rise 1.2s ease-out infinite}
 .slot .smoke.on::after{left:55%;animation-delay:.4s}
-.slot .tops{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);display:flex;gap:2px}
-.slot .tops b{font-size:11px;background:var(--paper);color:var(--ink);border-radius:4px;padding:0 3px;white-space:nowrap}
+.slot .tops{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:1px;width:120%}
+.slot .tops b{font-size:10px;background:var(--paper);color:var(--ink);border-radius:4px;padding:0 3px;white-space:nowrap}
+.slot .hint{position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:900;color:#fff;background:var(--scallion);border-radius:4px;padding:0 4px;white-space:nowrap}
 
-.starters{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
-.btn{background:var(--paper);border-radius:10px;box-shadow:0 3px 0 #D8C3A5;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:3px 0 2px;font-weight:900;font-size:12px;gap:1px;min-height:44px;transition:transform .05s}
-.btn:active,.btn.press{transform:translateY(2px);box-shadow:0 1px 0 #D8C3A5}
-.btn svg{width:28px;height:28px}
-.tops-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.chip{background:var(--paper);border-radius:999px;box-shadow:0 3px 0 #D8C3A5;font-weight:900;font-size:13px;min-height:34px;
-  display:flex;align-items:center;justify-content:center;gap:5px}
-.chip i{width:12px;height:12px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.15)}
-.chip.sauce{background:#F3E4CF}
-.chip.press,.chip:active{transform:translateY(2px);box-shadow:0 1px 0 #D8C3A5}
+.boards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.board{position:relative;height:62px;border-radius:10px;background:var(--wood);box-shadow:inset 0 0 0 2px var(--wood-dk),0 3px 0 var(--wood-dk);
+  display:flex;align-items:center;gap:4px;padding:4px 6px;box-sizing:border-box;min-width:0;
+  background-image:repeating-linear-gradient(90deg,transparent 0 18px,rgba(185,127,69,.25) 18px 19px)}
+.board.sel{box-shadow:inset 0 0 0 2px var(--wood-dk),0 0 0 3px var(--paper),0 0 0 6px var(--yolk)}
+.board .bimg{width:46px;height:46px;flex:0 0 auto}
+.board .bimg svg{width:100%;height:100%}
+.board .btags{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:2px;align-content:center}
+.board .btags b{font-size:10.5px;background:var(--paper);border-radius:4px;padding:0 3px;white-space:nowrap}
+.board .bname{font-weight:900;font-size:13px;width:100%}
+.board .empty{margin:auto;font-size:12px;font-weight:700;color:rgba(59,42,32,.45)}
+.board .bbtns{display:flex;flex-direction:column;gap:4px;flex:0 0 auto}
+.board .bbtns button{width:40px;height:24px;border-radius:7px;font-size:12px;font-weight:900;background:var(--paper);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.board .bbtns .send{background:var(--scallion);color:#fff}
+
+.ings{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.ing{border-radius:10px;font-weight:900;font-size:12px;min-height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background:var(--paper);box-shadow:0 3px 0 #D8C3A5;line-height:1.1;padding:2px 0;transition:transform .05s}
+.ing svg{width:22px;height:22px}
+.ing.g{background:#4A505A;color:#fff;box-shadow:0 3px 0 #23272d}
+.ing.g span::after{content:"🔥";font-size:8px;vertical-align:super}
+.ing.b{background:#F3D3A6;box-shadow:0 3px 0 var(--wood-dk)}
+.ing.c{min-height:32px;flex-direction:row;gap:4px;border-radius:999px}
+.ing.c i{width:11px;height:11px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.18)}
+.ing.s{background:#F0DEC6}
+.ing.press,.ing:active{transform:translateY(2px);box-shadow:none}
 .shake{animation:shake .3s}
 
-.bar{flex:0 0 auto;display:grid;grid-template-columns:1fr 64px;gap:6px}
-.cups{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;min-height:0}
-.station{display:flex;flex-direction:column;align-items:center;gap:3px;min-height:0}
-.cup{position:relative;width:100%;height:clamp(64px,12vh,100px);touch-action:none}
-.cup .glass{position:absolute;inset:0;clip-path:polygon(6% 0,94% 0,80% 100%,20% 100%);background:rgba(255,255,255,.75);
+.cups{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.station{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.cup{position:relative;width:100%;height:clamp(50px,8.5vh,80px);touch-action:none}
+.cup .glass{position:absolute;inset:0;clip-path:polygon(6% 0,94% 0,80% 100%,20% 100%);background:rgba(255,255,255,.8);
   box-shadow:inset 0 0 0 2px rgba(0,0,0,.1)}
 .cup .liq{position:absolute;left:0;right:0;bottom:0;height:0}
 .cup .band{position:absolute;left:0;right:0;border-top:2px dashed rgba(59,42,32,.45);border-bottom:2px dashed rgba(59,42,32,.45);background:rgba(95,163,62,.12)}
-.cup .band span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:900;color:var(--ink-soft)}
-.cup .nozzle{position:absolute;left:50%;top:-6px;width:10px;height:0;transform:translateX(-50%);border-radius:0 0 4px 4px}
+.cup .band span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:9px;font-weight:900;color:var(--ink-soft)}
+.cup .nozzle{position:absolute;left:50%;top:-6px;width:8px;height:0;transform:translateX(-50%);border-radius:0 0 4px 4px}
 .cup.pouring .nozzle{height:calc(100% - var(--lv,0%) + 6px)}
 .cup.pouring{transform:scale(.97)}
 .cup.spill .glass{animation:shake .3s}
-.drinkName{font-weight:900;font-size:13px}
-.cupBtns{display:flex;gap:4px;width:100%}
-.cupBtns button{flex:1;border-radius:8px;font-weight:900;font-size:12px;min-height:30px;background:var(--paper);box-shadow:0 2px 0 #D8C3A5}
+.drinkName{font-weight:900;font-size:12px}
+.cupBtns{display:flex;gap:3px;width:100%}
+.cupBtns button{flex:1;border-radius:7px;font-weight:900;font-size:11.5px;min-height:28px;background:var(--paper);box-shadow:0 2px 0 #D8C3A5}
 .cupBtns .send{background:var(--scallion);color:#fff;box-shadow:0 2px 0 #3E7525}
 .cupBtns button:disabled{opacity:.35}
-.shelf{display:flex;flex-direction:column;gap:6px}
-.shelf .btn{flex:1}
 
 /* ---------- 浮動提示 ---------- */
 #oops{position:absolute;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;pointer-events:none;margin:0 -10px;padding:16px}
@@ -166,26 +171,37 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 #oops .os{margin-top:6px;font-weight:700;font-size:14px;color:var(--tomato)}
 @keyframes oopsIn{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1) rotate(-2deg);opacity:1}}
 @keyframes oopsOut{to{transform:scale(.8) translateY(30px);opacity:0}}
-#toast{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);background:var(--ink);color:#fff;font-weight:900;padding:8px 14px;border-radius:12px;
+#toast{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);background:var(--ink);color:#fff;font-weight:900;padding:8px 14px;border-radius:12px;
   font-size:15px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:20;text-align:center;max-width:85%}
 #toast.show{opacity:.92}
 #flash{position:absolute;inset:0;background:var(--tomato);opacity:0;pointer-events:none;z-index:19;margin:0 -10px}
 #flash.on{animation:flash .45s}
-.floater{position:absolute;z-index:21;font-family:var(--display);font-size:22px;color:var(--scallion);pointer-events:none;animation:floatUp 1s ease-out forwards;text-shadow:0 2px 0 #fff}
+.floater{position:absolute;z-index:21;font-family:var(--display);font-size:20px;color:var(--scallion);pointer-events:none;animation:floatUp 1.1s ease-out forwards;text-shadow:0 2px 0 #fff;white-space:nowrap}
+.floater.bad{color:var(--tomato)}
 
 /* ---------- 覆蓋畫面 ---------- */
-.overlay{position:absolute;inset:0;z-index:30;background:rgba(59,42,32,.55);display:flex;align-items:center;justify-content:center;margin:0 -10px;padding:16px}
-.card{background:var(--cream);border-radius:20px;padding:20px 18px;width:100%;max-width:360px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.2);
-  display:flex;flex-direction:column;gap:12px;border:4px solid var(--tomato)}
-.card h1{font-family:var(--display);font-size:32px;margin:0;color:var(--tomato);text-wrap:balance;line-height:1.15}
+.overlay{position:absolute;inset:0;z-index:30;background:rgba(59,42,32,.55);display:flex;align-items:center;justify-content:center;margin:0 -10px;padding:16px;overflow-y:auto}
+.card{background:var(--cream);border-radius:20px;padding:18px 16px;width:100%;max-width:360px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.2);
+  display:flex;flex-direction:column;gap:11px;border:4px solid var(--tomato);margin:auto}
+.card h1{font-family:var(--display);font-size:30px;margin:0;color:var(--tomato);text-wrap:balance;line-height:1.15}
 .card h2{font-family:var(--display);font-size:26px;margin:0;color:var(--tomato);text-wrap:balance}
 .card p{margin:0;line-height:1.55;font-size:14px}
-.card .big{font-family:var(--display);font-size:20px;line-height:1.45;color:var(--ink)}
-.card ul{text-align:left;margin:0;padding-left:20px;font-size:13.5px;line-height:1.6}
+.card .big{font-family:var(--display);font-size:19px;line-height:1.45;color:var(--ink)}
+.card ul{text-align:left;margin:0;padding-left:20px;font-size:13px;line-height:1.55}
+.namerow{display:flex;gap:8px;align-items:center}
+.namerow label{font-weight:900;font-size:14px;white-space:nowrap}
+.namerow input{flex:1;min-width:0;font:inherit;font-family:var(--display);font-size:20px;color:var(--ink);background:var(--paper);border:3px solid var(--wood);border-radius:12px;padding:6px 10px;
+  -webkit-user-select:text;user-select:text;touch-action:auto}
+.namerow input:focus{outline:none;border-color:var(--tomato)}
+#dice{width:48px;height:48px;font-size:28px;border-radius:12px;background:var(--yolk);box-shadow:0 4px 0 #C98D16;flex:0 0 auto}
+#dice.roll{animation:roll .5s ease-out}
 .cta{background:var(--tomato);color:#fff;font-family:var(--display);font-size:22px;border-radius:14px;padding:12px;box-shadow:0 5px 0 var(--tomato-dk)}
 .cta:active{transform:translateY(3px);box-shadow:0 2px 0 var(--tomato-dk)}
 .ghostbtn{font-weight:700;color:var(--ink-soft);font-size:13px;text-decoration:underline}
 .titleBadge{background:var(--yolk);border-radius:14px;padding:10px;font-family:var(--display);font-size:26px;color:var(--ink);box-shadow:0 4px 0 #C98D16}
+.books{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-variant-numeric:tabular-nums}
+.books div{background:var(--paper);border-radius:10px;padding:6px 0;font-size:12px;font-weight:700;color:var(--ink-soft)}
+.books b{display:block;font-family:var(--display);font-size:20px;color:var(--ink)}
 .stat{display:flex;justify-content:center;gap:14px;font-size:13px;font-weight:700;color:var(--ink-soft);font-variant-numeric:tabular-nums;flex-wrap:wrap}
 
 @keyframes hop{0%{transform:translateY(16px) scale(.8);opacity:0}100%{transform:none;opacity:1}}
@@ -197,40 +213,41 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 @keyframes flash{0%{opacity:.45}100%{opacity:0}}
 @keyframes floatUp{to{transform:translateY(-40px);opacity:0}}
 @keyframes flashBg{50%{background:var(--yolk)}}
-@media (max-width:385px){.sign{font-size:12px;letter-spacing:0}.pill{padding:2px 6px}.stats{gap:4px;font-size:13px}.iconbtn{width:26px;height:26px}}
+@keyframes roll{0%{transform:rotate(0)}100%{transform:rotate(720deg)}}
+@media (max-width:385px){.sign{font-size:12px;letter-spacing:0}.pill{padding:2px 6px}.stats{gap:4px;font-size:13px}.iconbtn{width:26px;height:26px}.ing{font-size:11px}}
+@media (max-height:700px){.grill{min-height:110px}.kitchen{gap:5px}.ing{min-height:36px}.ing svg{width:18px;height:18px}.ing.c{min-height:28px}.board{height:52px}.board .bimg{width:38px;height:38px}.ticket{min-height:72px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
-@media (max-height:700px){.grill{min-height:110px}.kitchen{gap:5px;padding-top:6px}.cup{height:56px}.starters .btn span{font-size:11px}.btn{min-height:40px}.btn svg{width:24px;height:24px}.chip{min-height:30px}}
 </style>
 </head>
 <body>
 <div id="app">
   <header class="hud">
-    <div class="sign">帥哥美女早餐店</div>
+    <div class="sign" id="sign">帥哥美女早餐店</div>
     <div class="stats">
       <span class="pill" id="timer">5:00</span>
       <span class="pill" id="served">0/20</span>
-      <span class="pill" id="money">$0</span>
       <span id="lives"></span>
       <button class="iconbtn" id="muteBtn" aria-label="聲音開關">🔊</button>
       <button class="iconbtn" id="pauseBtn" aria-label="暫停">Ⅱ</button>
     </div>
   </header>
 
-  <section class="front" id="front">
+  <section class="front">
     <div class="say" id="bossSay"></div>
     <div class="say" id="custSay"></div>
     <div class="ticket" id="ticket"></div>
-    <div class="counter"></div>
+    <div class="ledger">
+      <span class="in">收 <b id="inc">$0</b></span>
+      <span class="out">賠 <b id="loss">$0</b></span>
+      <span class="net" id="netWrap">淨賺 <b id="net">$0</b></span>
+    </div>
   </section>
 
   <section class="kitchen">
     <div class="grill" id="grill"></div>
-    <div class="starters" id="starters"></div>
-    <div class="tops-row" id="topsRow"></div>
-    <div class="bar">
-      <div class="cups" id="cups"></div>
-      <div class="shelf" id="shelf"></div>
-    </div>
+    <div class="boards" id="boards"></div>
+    <div class="ings" id="ings"></div>
+    <div class="cups" id="cups"></div>
   </section>
 
   <div id="toast"></div>
@@ -247,7 +264,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 'use strict';
 const $ = s => document.querySelector(s);
 
-/* ================= 亂數（用種子，之後雙人對戰可以讓兩邊客人一樣） ================= */
+/* ================= 亂數（用種子，之後雙人對戰可以讓兩邊訂單一樣） ================= */
 let seed = 1;
 function rand(){ seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
 const rnd = (a,b) => a + rand()*(b-a);
@@ -257,153 +274,172 @@ const pickAny = a => a[Math.floor(Math.random()*a.length)];   // 純裝飾用，
 const clamp01 = t => Math.max(0,Math.min(1,t));
 const lerp = (a,b,t) => a+(b-a)*clamp01(t);
 
-/* ================= 菜單 ================= */
-const GAME_LEN = 300, GOAL = 20, LIVES = 3;
-const GRILL = {
-  egg_pancake:{name:'蛋餅',  cook:5,   price:30},
-  radish:     {name:'蘿蔔糕',cook:6,   price:35},
-  fried_egg:  {name:'荷包蛋',cook:3.5, price:15},
-  noodle:     {name:'鐵板麵',cook:5.5, price:55},
-  hotdog:     {name:'熱狗',  cook:4,   price:25},
-  hashbrown:  {name:'薯餅',  cook:4.5, price:25},
+/* ================= 菜單與食材 ================= */
+const GAME_LEN = 300, GOAL = 20, LIVES = 3, COST_RATE = .4;
+// 夾料：cooked = 要先上煎台；sauce = 鐵板麵醬
+const ING = {
+  pork:    {name:'肉鬆',  price:10, color:'#B5743A'},
+  cheese:  {name:'起司',  price:10, color:'#FFB627'},
+  corn:    {name:'玉米',  price:10, color:'#FFE15A'},
+  tuna:    {name:'鮪魚',  price:15, color:'#E8C3A8'},
+  ham:     {name:'火腿',  price:10, color:'#F49AA0'},
+  lettuce: {name:'生菜',  price:5,  color:'#7CC35A'},
+  tomato:  {name:'番茄',  price:5,  color:'#E8483B'},
+  cucumber:{name:'小黃瓜',price:5,  color:'#3F8A35'},
+  youtiao: {name:'油條',  price:10, color:'#D9963A'},
+  radishd: {name:'菜脯',  price:5,  color:'#C9A04E'},
+  egg:     {name:'荷包蛋',price:10, color:'#F6B93B', cooked:true, cook:3.5},
+  bacon:   {name:'培根',  price:15, color:'#D9534F', cooked:true, cook:3},
+  chop:    {name:'豬排',  price:25, color:'#B8742F', cooked:true, cook:5},
+  chicken: {name:'卡拉雞',price:30, color:'#E08A2C', cooked:true, cook:5.5},
+  pepper:  {name:'黑胡椒',price:0,  color:'#4A2E1A', sauce:true},
+  mush:    {name:'蘑菇',  price:0,  color:'#B98B5E', sauce:true},
 };
-const TOPS = {
-  pork:  {name:'肉鬆',  for:'egg_pancake', color:'#B5743A'},
-  cheese:{name:'起司',  for:'egg_pancake', color:'#FFB627'},
-  ham:   {name:'火腿',  for:'egg_pancake', color:'#F49AA0'},
-  corn:  {name:'玉米',  for:'egg_pancake', color:'#FFE15A'},
-  bacon: {name:'培根',  for:'egg_pancake', color:'#D9534F'},
-  tuna:  {name:'鮪魚',  for:'egg_pancake', color:'#E8C3A8'},
-  pepper:{name:'黑胡椒',for:'noodle', sauce:true, color:'#4A2E1A'},
-  mush:  {name:'蘑菇',  for:'noodle', sauce:true, color:'#B98B5E'},
+// 主食：都要配料，不能直接出。蛋餅在煎台做，其他在工作台組
+const MAINS = {
+  egg_pancake:{name:'蛋餅',  price:25, grill:true, cook:5, fill:['pork','cheese','corn','tuna','ham','bacon']},
+  toast:      {name:'三明治',price:20, fill:['ham','cheese','egg','lettuce','tomato','cucumber','bacon','tuna','chop']},
+  burger:     {name:'漢堡',  price:30, fill:['chop','chicken','egg','cheese','lettuce','tomato','bacon']},
+  riceball:   {name:'飯糰',  price:30, fill:['youtiao','radishd','pork','egg','cheese']},
 };
-const EGG_TOPS = ['pork','cheese','ham','corn','bacon','tuna'];
+const SIDES = {
+  radish:   {name:'蘿蔔糕',price:35, cook:6},
+  noodle:   {name:'鐵板麵',price:55, cook:5.5},
+  hotdog:   {name:'熱狗',  price:25, cook:4},
+  hashbrown:{name:'薯餅',  price:25, cook:4.5},
+};
 const DRINKS = {
   milktea: {name:'奶茶',color:'#C9A27C'},
   blacktea:{name:'紅茶',color:'#9C4A1C'},
   soy:     {name:'豆漿',color:'#EFE2C4'},
   ricemilk:{name:'米漿',color:'#C9A479'},
+  coffee:  {name:'咖啡',color:'#6B4A33'},
 };
-const SIZES = { M:{name:'中',lo:50,hi:66,price:20}, L:{name:'大',lo:80,hi:95,price:25} };
-const SHELF = { sandwich:{name:'三明治',price:35}, riceball:{name:'飯糰',price:40} };
+const SIZES = { M:{name:'中',lo:50,hi:66,price:20}, L:{name:'大',lo:80,hi:99,price:25} };
+const SHOP_NAMES = ['帥哥美女早餐店','七貓早餐店','蛋餅研究所','大冰奶續命站','肉鬆加好加滿','早安燈燈燈','阿姨我要一份','起司牽絲很長',
+  '睡飽再來早餐','蛋餅不會飛','鐵板麵很鐵','加蛋不加價','早起的蟲蟲','漢堡不漢堡','奶茶微微甜'];
+
+const cookOf = t => (MAINS[t] && MAINS[t].cook) || (SIDES[t] && SIDES[t].cook) || (ING[t] && ING[t].cook);
+const nameOf = t => (MAINS[t]||SIDES[t]||ING[t]||DRINKS[t]).name;
 
 /* ================= 扁平風食物插圖（SVG） ================= */
 function topSVG(id){
   switch(id){
-    case 'pork':  return '<g fill="#B5743A"><circle cx="31" cy="42" r="6"/><circle cx="38" cy="36" r="5"/><circle cx="40" cy="45" r="5"/><circle cx="33" cy="50" r="4"/></g><g fill="#D79A5B"><circle cx="34" cy="41" r="2"/><circle cx="39" cy="40" r="1.6"/></g>';
-    case 'cheese':return '<rect x="40" y="40" width="22" height="22" rx="3" fill="#FFB627" transform="rotate(14 51 51)"/><circle cx="47" cy="47" r="2.5" fill="#FFD36E"/><circle cx="55" cy="55" r="2" fill="#FFD36E"/>';
+    case 'pork':  return '<g fill="#B5743A"><circle cx="31" cy="42" r="6"/><circle cx="38" cy="36" r="5"/><circle cx="40" cy="45" r="5"/><circle cx="33" cy="50" r="4"/></g>';
+    case 'cheese':return '<rect x="40" y="40" width="22" height="22" rx="3" fill="#FFB627" transform="rotate(14 51 51)"/><circle cx="47" cy="47" r="2.5" fill="#FFD36E"/>';
     case 'ham':   return '<circle cx="65" cy="42" r="11" fill="#F49AA0"/><circle cx="65" cy="42" r="7" fill="#F8B7BB"/>';
-    case 'corn':  return '<g fill="#FFE15A" stroke="#E2B92B" stroke-width="1"><circle cx="42" cy="66" r="3.4"/><circle cx="49" cy="70" r="3.4"/><circle cx="37" cy="72" r="3.4"/><circle cx="45" cy="76" r="3.4"/><circle cx="53" cy="64" r="3.4"/></g>';
-    case 'bacon': return '<path d="M58 66 q5 -6 10 0 t10 0" stroke="#D9534F" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M58 66 q5 -6 10 0 t10 0" stroke="#F7C6C0" stroke-width="2" fill="none" stroke-linecap="round"/>';
-    case 'tuna':  return '<path d="M22 58 q6 -10 16 -4 q4 8 -4 12 q-10 2 -12 -8z" fill="#E8C3A8"/><path d="M26 58 q5 -3 9 0" stroke="#C99A7A" stroke-width="1.5" fill="none"/>';
-    case 'pepper':return '<ellipse cx="50" cy="52" rx="24" ry="20" fill="#4A2E1A" opacity=".88"/><g fill="#111"><circle cx="42" cy="46" r="1.6"/><circle cx="55" cy="44" r="1.6"/><circle cx="50" cy="58" r="1.6"/><circle cx="60" cy="56" r="1.6"/><circle cx="40" cy="57" r="1.6"/></g>';
-    case 'mush':  return '<ellipse cx="50" cy="52" rx="24" ry="20" fill="#B98B5E" opacity=".9"/><g fill="#EDE0CC" stroke="#8C6440" stroke-width="1.5"><path d="M38 52 a7 6 0 0 1 14 0z"/><rect x="43" y="52" width="4" height="6" rx="1"/><path d="M52 44 a6 5 0 0 1 12 0z"/><rect x="56" y="44" width="4" height="5" rx="1"/></g>';
+    case 'corn':  return '<g fill="#FFE15A" stroke="#E2B92B" stroke-width="1"><circle cx="42" cy="66" r="3.4"/><circle cx="49" cy="70" r="3.4"/><circle cx="37" cy="72" r="3.4"/><circle cx="53" cy="64" r="3.4"/></g>';
+    case 'bacon': return '<path d="M58 66 q5 -6 10 0 t10 0" stroke="#D9534F" stroke-width="7" fill="none" stroke-linecap="round"/>';
+    case 'tuna':  return '<path d="M22 58 q6 -10 16 -4 q4 8 -4 12 q-10 2 -12 -8z" fill="#E8C3A8"/>';
+    case 'pepper':return '<ellipse cx="50" cy="52" rx="24" ry="20" fill="#4A2E1A" opacity=".88"/><g fill="#111"><circle cx="42" cy="46" r="1.6"/><circle cx="55" cy="44" r="1.6"/><circle cx="50" cy="58" r="1.6"/></g>';
+    case 'mush':  return '<ellipse cx="50" cy="52" rx="24" ry="20" fill="#B98B5E" opacity=".9"/><g fill="#EDE0CC" stroke="#8C6440" stroke-width="1.5"><path d="M38 52 a7 6 0 0 1 14 0z"/><path d="M52 44 a6 5 0 0 1 12 0z"/></g>';
   }
   return '';
 }
 function cupSVG(color){
-  return `<path d="M24 24 h52 l-8 64 h-36z" fill="#FFFFFF"/><path d="M27 40 h46 l-6 46 h-34z" fill="${color}"/><rect x="20" y="18" width="60" height="8" rx="3" fill="#F2F2F2"/><rect x="20" y="18" width="60" height="3" rx="1.5" fill="#E4572E"/><rect x="54" y="4" width="6" height="22" rx="2" fill="#5FA33E" transform="rotate(12 57 15)"/><rect x="30" y="54" width="18" height="12" rx="3" fill="#fff" opacity=".35"/>`;
+  return `<path d="M24 24 h52 l-8 64 h-36z" fill="#FFFFFF"/><path d="M27 40 h46 l-6 46 h-34z" fill="${color}"/><rect x="20" y="18" width="60" height="8" rx="3" fill="#F2F2F2"/><rect x="20" y="18" width="60" height="3" rx="1.5" fill="#E4572E"/><rect x="54" y="4" width="6" height="22" rx="2" fill="#5FA33E" transform="rotate(12 57 15)"/>`;
 }
 function foodSVG(type, tops){
   tops = tops || [];
   let s = '';
   switch(type){
     case 'egg_pancake':
-      s = '<ellipse cx="50" cy="52" rx="42" ry="38" fill="#F2D29B"/><ellipse cx="50" cy="52" rx="35" ry="31" fill="#F6C453"/><path d="M26 47 q12 -9 24 0 t24 0" stroke="#FBE3A0" stroke-width="5" fill="none" stroke-linecap="round"/><g fill="#5FA33E"><circle cx="34" cy="62" r="2.6"/><circle cx="60" cy="36" r="2.6"/><circle cx="68" cy="60" r="2.6"/><circle cx="52" cy="70" r="2.2"/></g>';
-      s += tops.map(topSVG).join('');
-      break;
+      s = '<ellipse cx="50" cy="52" rx="42" ry="38" fill="#F2D29B"/><ellipse cx="50" cy="52" rx="35" ry="31" fill="#F6C453"/><path d="M26 47 q12 -9 24 0 t24 0" stroke="#FBE3A0" stroke-width="5" fill="none" stroke-linecap="round"/><g fill="#5FA33E"><circle cx="34" cy="62" r="2.6"/><circle cx="60" cy="36" r="2.6"/><circle cx="68" cy="60" r="2.6"/></g>';
+      s += tops.map(topSVG).join(''); break;
+    case 'toast':
+      s = '<path d="M14 72 L50 22 L86 72z" fill="#F5DEB3"/><path d="M20 66 L50 26 L80 66z" fill="#5FA33E"/><path d="M24 62 L50 30 L76 62z" fill="#F49AA0"/><path d="M28 58 L50 34 L72 58z" fill="#F6C453"/><path d="M32 56 L50 38 L68 56z" fill="#FFF3D6"/><rect x="14" y="70" width="72" height="6" rx="2" fill="#E2C08D"/>'; break;
+    case 'burger':
+      s = '<path d="M16 50 q34 -40 68 0z" fill="#E4A44C"/><g fill="#FFF3D6"><ellipse cx="38" cy="36" rx="2.5" ry="1.5"/><ellipse cx="52" cy="31" rx="2.5" ry="1.5"/><ellipse cx="64" cy="38" rx="2.5" ry="1.5"/></g><path d="M14 54 q9 -6 18 0 t18 0 t18 0 t18 0" stroke="#6CB24A" stroke-width="6" fill="none" stroke-linecap="round"/><rect x="16" y="56" width="68" height="12" rx="6" fill="#7A4A2A"/><rect x="18" y="68" width="64" height="14" rx="6" fill="#E4A44C"/>'; break;
+    case 'riceball':
+      s = '<rect x="12" y="32" width="76" height="36" rx="18" fill="#7B5A8C"/><rect x="18" y="36" width="64" height="12" rx="6" fill="#9A7AAB"/><ellipse cx="18" cy="50" rx="6" ry="14" fill="#B5743A"/><ellipse cx="82" cy="50" rx="6" ry="14" fill="#F6C453"/><path d="M14 30 L86 70" stroke="#fff" stroke-width="2" opacity=".55"/>'; break;
     case 'radish':
-      s = '<rect x="12" y="26" width="38" height="38" rx="5" fill="#F1E9D8" stroke="#D9A35A" stroke-width="5"/><rect x="48" y="38" width="38" height="38" rx="5" fill="#F1E9D8" stroke="#D9A35A" stroke-width="5"/><g fill="#C2A27A"><circle cx="26" cy="40" r="1.6"/><circle cx="36" cy="50" r="1.6"/><circle cx="62" cy="52" r="1.6"/><circle cx="72" cy="62" r="1.6"/></g>';
-      break;
-    case 'fried_egg':
-      s = '<path d="M50 14 C74 14 88 30 84 50 C80 70 90 84 62 86 C40 88 14 82 16 58 C18 40 26 14 50 14z" fill="#FFFFFF"/><circle cx="50" cy="50" r="15" fill="#F6B93B"/><circle cx="45" cy="45" r="4" fill="#FFE29A"/>';
-      break;
+      s = '<rect x="12" y="26" width="38" height="38" rx="5" fill="#F1E9D8" stroke="#D9A35A" stroke-width="5"/><rect x="48" y="38" width="38" height="38" rx="5" fill="#F1E9D8" stroke="#D9A35A" stroke-width="5"/>'; break;
+    case 'egg':
+      s = '<path d="M50 14 C74 14 88 30 84 50 C80 70 90 84 62 86 C40 88 14 82 16 58 C18 40 26 14 50 14z" fill="#FFFFFF"/><circle cx="50" cy="50" r="15" fill="#F6B93B"/><circle cx="45" cy="45" r="4" fill="#FFE29A"/>'; break;
     case 'noodle':
       s = '<g fill="none" stroke="#F2C14E" stroke-width="5" stroke-linecap="round"><path d="M18 50 q10 -20 22 0 t22 0 t20 0"/><path d="M20 62 q10 -18 22 0 t22 0 t18 -4"/><path d="M24 38 q12 -14 22 0 t22 0 t12 4"/><path d="M28 74 q10 -12 20 0 t20 0"/></g>';
-      s += tops.map(topSVG).join('');
-      break;
+      s += tops.map(topSVG).join(''); break;
     case 'hotdog':
-      s = '<g transform="rotate(-18 50 50)"><rect x="12" y="30" width="76" height="18" rx="9" fill="#C8553D"/><rect x="12" y="56" width="76" height="18" rx="9" fill="#C8553D"/><g stroke="#E98A6E" stroke-width="3" stroke-linecap="round"><path d="M30 34 l6 10"/><path d="M48 34 l6 10"/><path d="M66 34 l6 10"/><path d="M30 60 l6 10"/><path d="M48 60 l6 10"/><path d="M66 60 l6 10"/></g></g>';
-      break;
+      s = '<g transform="rotate(-18 50 50)"><rect x="12" y="30" width="76" height="18" rx="9" fill="#C8553D"/><rect x="12" y="56" width="76" height="18" rx="9" fill="#C8553D"/><g stroke="#E98A6E" stroke-width="3" stroke-linecap="round"><path d="M30 34 l6 10"/><path d="M48 34 l6 10"/><path d="M66 34 l6 10"/><path d="M30 60 l6 10"/><path d="M48 60 l6 10"/><path d="M66 60 l6 10"/></g></g>'; break;
     case 'hashbrown':
-      s = '<rect x="16" y="26" width="68" height="48" rx="22" fill="#E9A93B" stroke="#C7822A" stroke-width="4"/><g stroke="#F6CB72" stroke-width="2.4"><path d="M30 38 l38 24"/><path d="M28 50 l30 18"/><path d="M42 32 l30 18"/></g>';
-      break;
-    case 'sandwich':
-      s = '<path d="M14 72 L50 22 L86 72z" fill="#F5DEB3"/><path d="M20 66 L50 26 L80 66z" fill="#5FA33E"/><path d="M24 62 L50 30 L76 62z" fill="#F49AA0"/><path d="M28 58 L50 34 L72 58z" fill="#F6C453"/><path d="M32 56 L50 38 L68 56z" fill="#FFF3D6"/><rect x="14" y="70" width="72" height="6" rx="2" fill="#E2C08D"/>';
-      break;
-    case 'riceball':
-      s = '<rect x="12" y="32" width="76" height="36" rx="18" fill="#7B5A8C"/><rect x="18" y="36" width="64" height="12" rx="6" fill="#9A7AAB"/><ellipse cx="18" cy="50" rx="6" ry="14" fill="#B5743A"/><ellipse cx="82" cy="50" rx="6" ry="14" fill="#F6C453"/><path d="M14 30 L86 70" stroke="#fff" stroke-width="2" opacity=".55"/>';
-      break;
+      s = '<rect x="16" y="26" width="68" height="48" rx="22" fill="#E9A93B" stroke="#C7822A" stroke-width="4"/><g stroke="#F6CB72" stroke-width="2.4"><path d="M30 38 l38 24"/><path d="M28 50 l30 18"/><path d="M42 32 l30 18"/></g>'; break;
+    case 'bacon':
+      s = '<g fill="none" stroke-linecap="round"><path d="M14 38 q9 -10 18 0 t18 0 t18 0 t18 0" stroke="#D9534F" stroke-width="12"/><path d="M14 38 q9 -10 18 0 t18 0 t18 0 t18 0" stroke="#F7C6C0" stroke-width="3"/><path d="M14 64 q9 -10 18 0 t18 0 t18 0 t18 0" stroke="#D9534F" stroke-width="12"/><path d="M14 64 q9 -10 18 0 t18 0 t18 0 t18 0" stroke="#F7C6C0" stroke-width="3"/></g>'; break;
+    case 'chop':
+      s = '<path d="M18 44 q8 -22 40 -18 q28 4 26 28 q-2 26 -34 26 q-36 0 -32 -36z" fill="#C98A3E"/><g fill="#E6B066"><circle cx="34" cy="40" r="2.5"/><circle cx="50" cy="36" r="2.5"/><circle cx="64" cy="46" r="2.5"/><circle cx="42" cy="58" r="2.5"/><circle cx="60" cy="64" r="2.5"/><circle cx="30" cy="62" r="2"/></g>'; break;
+    case 'chicken':
+      s = '<path d="M22 50 q-6 -20 14 -26 q10 -10 24 -2 q20 -2 22 18 q8 14 -6 26 q-8 14 -28 10 q-22 2 -26 -26z" fill="#E39B3B" stroke="#B86E1E" stroke-width="3"/><g fill="#F5C26B"><circle cx="40" cy="40" r="3"/><circle cx="58" cy="48" r="3"/><circle cx="46" cy="62" r="3"/></g>'; break;
     default:
       if (DRINKS[type]) s = cupSVG(DRINKS[type].color);
   }
   return `<svg viewBox="0 0 100 100" aria-hidden="true">${s}</svg>`;
 }
 
-/* ================= 點單 ================= */
+/* ================= 餐點 ================= */
 function makeItem(kind, type, tops, size){
   tops = (tops||[]).slice();
-  const sortedTops = tops.slice().sort();
-  let key, label, sub = '', price;
-  if (kind === 'grill'){
-    key = type + '|' + sortedTops.join(',');
-    price = GRILL[type].price + (type==='egg_pancake' ? 10*tops.length : 0);
-    if (type === 'egg_pancake'){
-      label = tops.length ? '蛋餅' : '原味蛋餅';
-      sub = tops.map(t=>'+'+TOPS[t].name).join(' ');
-    } else if (type === 'noodle'){
-      label = '鐵板麵'; sub = tops.length ? TOPS[tops[0]].name+'醬' : '（沒醬）';
-    } else label = GRILL[type].name;
-  } else if (kind === 'drink'){
-    key = type + '|' + size;
+  let label, sub = '', price;
+  if (kind === 'main'){
+    price = MAINS[type].price + tops.reduce((a,t)=>a+ING[t].price, 0);
+    label = (type==='egg_pancake' && !tops.length) ? '原味蛋餅' : MAINS[type].name;
+    sub = tops.map(t=>ING[t].name).join('、');
+  } else if (kind === 'side'){
+    price = SIDES[type].price; label = SIDES[type].name;
+    if (type === 'noodle') sub = tops.length ? ING[tops[0]].name+'醬' : '還沒加醬';
+  } else {
     price = SIZES[size] ? SIZES[size].price : 0;
     label = (SIZES[size] ? SIZES[size].name : '怪') + '杯' + DRINKS[type].name;
-  } else {
-    key = type; price = SHELF[type].price; label = SHELF[type].name;
   }
-  return {kind, type, tops, size, key, label, sub, price};
+  return {kind, type, tops, size, label, sub, price};
+}
+const costOf = it => Math.max(3, Math.round(it.price * COST_RATE));
+
+// 比對：exact 剛好、over 給多了（收訂單的錢，差額算賠）、under 少給（免費）
+function compare(want, made){
+  if (want.kind !== made.kind || want.type !== made.type) return null;
+  if (want.kind === 'drink'){
+    if (made.size === want.size) return 'exact';
+    return (want.size === 'M' && made.size === 'L') ? 'over' : 'under';
+  }
+  if (want.kind === 'side') return (want.type !== 'noodle' || want.tops[0] === made.tops[0]) ? 'exact' : 'under';
+  if (!want.tops.every(t=>made.tops.includes(t))) return 'under';
+  return made.tops.length === want.tops.length ? 'exact' : 'over';
+}
+
+function pickFill(type, n){
+  const pool = MAINS[type].fill.slice(), out = [];
+  for (let i=0;i<n && pool.length;i++) out.push(pool.splice(Math.floor(rand()*pool.length),1)[0]);
+  return out;
 }
 function randomItem(t){
-  const early = t < 40;
-  const table = early
-    ? [['egg',5],['drink',5],['shelf',1.5],['fried_egg',1.5]]
-    : [['egg',4],['drink',4.5],['shelf',1.3],['fried_egg',1],['radish',1.4],['noodle',1.2],['hotdog',1],['hashbrown',1]];
-  let total = table.reduce((a,b)=>a+b[1],0), r = rand()*total, k = table[0][0];
+  const table = t < 40
+    ? [['egg_pancake',4],['toast',2],['drink',4],['hashbrown',1]]
+    : [['egg_pancake',3],['toast',1.6],['burger',1.4],['riceball',1.4],['drink',4.5],['radish',1],['noodle',1],['hotdog',.8],['hashbrown',.8]];
+  let r = rand()*table.reduce((a,b)=>a+b[1],0), k = table[0][0];
   for (const [name,w] of table){ if ((r-=w) <= 0){ k = name; break; } }
-  if (k === 'egg'){
-    const maxT = t < 60 ? 1 : t < 160 ? 2 : 3;
-    const n = ri(t < 30 ? 0 : 0, maxT);
-    const pool = EGG_TOPS.slice(), tops = [];
-    for (let i=0;i<n;i++) tops.push(pool.splice(Math.floor(rand()*pool.length),1)[0]);
-    return makeItem('grill','egg_pancake',tops);
+  if (MAINS[k]){
+    const hi = t < 60 ? 1 : t < 160 ? 2 : 3;
+    const lo = k === 'egg_pancake' ? 0 : 1;
+    return makeItem('main', k, pickFill(k, ri(lo, Math.max(lo,hi))));
   }
   if (k === 'drink') return makeItem('drink', pick(Object.keys(DRINKS)), [], rand()<.5?'M':'L');
-  if (k === 'shelf') return makeItem('shelf', pick(Object.keys(SHELF)));
-  if (k === 'noodle') return makeItem('grill','noodle',[rand()<.5?'pepper':'mush']);
-  return makeItem('grill', k, []);
+  if (k === 'noodle') return makeItem('side','noodle',[rand()<.5?'pepper':'mush']);
+  return makeItem('side', k, []);
 }
 function genOrder(t, n){
-  if (!n){
-    const lo = t < 50 ? 1 : 2, hi = t < 50 ? 2 : t < 140 ? 3 : 4;
-    n = ri(lo, hi);
-  }
-  const items = []; let grills = 0;
-  while (items.length < n){
-    const it = randomItem(t);
-    if (it.kind === 'grill' && grills >= 3) continue;
-    if (it.kind === 'grill') grills++;
-    items.push(it);
-  }
+  if (!n){ const lo = t < 50 ? 1 : 2, hi = t < 50 ? 2 : t < 150 ? 3 : 4; n = ri(lo, hi); }
+  const items = [];
+  while (items.length < n) items.push(randomItem(t));
   return items;
 }
-const UNCLE_ORDER = () => [makeItem('grill','radish'), makeItem('grill','fried_egg'), makeItem('drink','ricemilk',[],'L')];
+const UNCLE_ORDER = () => [makeItem('main','riceball',['youtiao','radishd']), makeItem('side','radish'), makeItem('drink','ricemilk',[],'L')];
 
 /* ================= 台詞 ================= */
 const LINES = {
-  wrongDetail:['咦？好像不是這個口味耶…','這是…老闆的隱藏版嗎？','料好像跑錯盤了～','客人：我看起來像愛吃這個的人嗎？'],
+  wrongDetail:['咦？好像少了什麼料耶…','這是…老闆的隱藏版嗎？','料好像跑錯盤了～','我點的料去哪裡旅行了？'],
   wrongItem:['這個…好像沒有點耶？','哇～是招待嗎？謝謝老闆！','這份是不是要給隔壁桌的？'],
-  wrongDrink:['這杯的量…有點藝術','中杯大杯，傻傻分不清楚～','這杯是要給螞蟻喝的嗎？'],
-  burnt:['煎到可以當暖暖包了','焦香味飄到隔壁去了','這不是蛋餅，是黑金限定版'],
+  wrongDrink:['說好的大杯呢？','這杯的量…有點藝術','這杯是要給螞蟻喝的嗎？'],
+  burnt:['煎到可以當暖暖包了','焦香味飄到隔壁去了','黑金限定版，不賣'],
   spill:['飲料在櫃台上開派對','櫃台說它喝飽了','拖把：又是我？'],
   leave:['訂單等到睡著了','客人先去上班了，下次見～','訂單：我自己走就好'],
   peek:['連老樣子都不記得喔…','我都來十年了欸！','唉，年輕人喔…'],
@@ -412,15 +448,19 @@ const OOPS_EMOJI = {wrong:'🥲', burnt:'🔥', spill:'🌊', leave:'💤'};
 const FAIL = {
   burnt:['客人在 Google 留了一顆星：「蛋餅有炭烤風味，很特別。」','消防隊來了，順便點了三份蛋餅。','煙太大，隔壁以為你在烤肉，拿肉來加入。'],
   wrong:['你媽打電話來：「還是回來考公務員好了。」','客人說：「老闆，你是不是第一天上班？」答：是。','今天的營業額是一張「謝謝老闆請客」的卡片。'],
-  leave:['客人都跑去隔壁排隊了，隔壁老闆娘對你比了個讚。','外送平台把你的店改成「休息中」。','阿伯說：「這間以前很好吃，換老闆了喔？」'],
+  leave:['訂單都飛去隔壁了，隔壁老闆娘對你比了個讚。','外送平台把你的店改成「休息中」。'],
   spill:['奶茶淹到門口，被里長檢舉了。','你發明了新飲品：「地板奶茶」，沒人想喝。'],
   timeup:['打烊了。明天開始改賣乾麵。','鐵門拉下來的時候，連店裡的貓都嘆了一口氣。','五分鐘只出這樣，老闆娘說你明天去顧收銀就好。'],
 };
 
-/* ================= 聲音：滋滋聲、叮、錯誤、倒飲料 + 老闆說話 ================= */
+/* ================= 聲音：滋滋聲、燈燈燈、背景音樂 ================= */
 let soundOn = true;
 const sfx = (() => {
   let ac, master, sizzleG, pourG;
+  const bgm = {on:false, next:0, step:0};
+  const MELODY = [76,0,79,0,81,79,76,0, 74,0,76,79,76,0,74,0, 72,0,74,0,76,79,81,0, 79,76,74,0,72,0,0,0];
+  const BASS = [48,43,45,43];
+  const midi = n => 440 * Math.pow(2, (n-69)/12);
   function init(){
     if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
@@ -437,10 +477,6 @@ const sfx = (() => {
     pourG = ac.createGain(); pourG.gain.value = 0;
     s2.connect(lp).connect(pourG).connect(master); s2.start();
   }
-  const bgm = {on:false, next:0, step:0};
-  const MELODY = [76,0,79,0,81,79,76,0, 74,0,76,79,76,0,74,0, 72,0,74,0,76,79,81,0, 79,76,74,0,72,0,0,0];
-  const BASS = [48,43,45,43];
-  const midi = n => 440 * Math.pow(2, (n-69)/12);
   function tone(f, dur, type='sine', vol=.18, delay=0, slide){
     if (!ac) return;
     const t0 = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
@@ -452,7 +488,7 @@ const sfx = (() => {
   return {
     init,
     mute(on){ if (master) master.gain.value = on ? 1 : 0; },
-    sizzle(n){ if (!sizzleG) return; const v = n ? Math.min(.22, .06 + n*.04) * (.6 + Math.random()*.8) : 0; sizzleG.gain.setTargetAtTime(v, ac.currentTime, .03); },
+    sizzle(n){ if (!sizzleG) return; const v = n ? Math.min(.22, .06 + n*.035) * (.6 + Math.random()*.8) : 0; sizzleG.gain.setTargetAtTime(v, ac.currentTime, .03); },
     pour(on){ if (pourG) pourG.gain.setTargetAtTime(on ? .35 : 0, ac.currentTime, .04); },
     plop(){ tone(320,.12,'sine',.25,0,110); },
     tick(){ tone(900,.05,'triangle',.12); },
@@ -460,6 +496,7 @@ const sfx = (() => {
     ding(){ tone(1046,.12,'sine',.2); tone(1568,.2,'sine',.18,.09); },
     cash(){ tone(1318,.07,'square',.08); tone(1760,.16,'square',.08,.07); tone(2093,.2,'sine',.12,.14); },
     buzz(){ tone(150,.38,'sawtooth',.2,0,90); },
+    meh(){ tone(520,.12,'triangle',.14); tone(440,.18,'triangle',.12,.1); },
     win(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,.25,'triangle',.18,i*.11)); },
     lose(){ [392,330,262,196].forEach((f,i)=>tone(f,.3,'sawtooth',.12,i*.18)); },
     chime(){ tone(1046,.14,'triangle',.2); tone(1318,.14,'triangle',.2,.11); tone(1568,.3,'triangle',.22,.22); },
@@ -482,24 +519,39 @@ const sfx = (() => {
     },
   };
 })();
+
+/* ================= 店名 ================= */
+let shopName = SHOP_NAMES[0];
+try { const s = localStorage.getItem('tw-breakfast-name'); if (s) shopName = s; } catch(e){}
+function setShopName(n){
+  shopName = (n || '').trim().slice(0, 10) || SHOP_NAMES[0];
+  $('#sign').textContent = shopName;
+  document.title = shopName;
+  try { localStorage.setItem('tw-breakfast-name', shopName); } catch(e){}
+}
+
 /* ================= 遊戲狀態 ================= */
 let S;
 function freshState(){
   return {
     running:false, paused:false, over:false,
     gt:0, spawnT:.8, spawned:0, cid:0,
-    queue:[], slots:[null,null,null,null], selected:null, born:0,
+    queue:[], pending:[], slots:[null,null,null,null,null,null], board:[null,null], sel:null, born:0,
     cups:Object.keys(DRINKS).map(type=>({type, level:0, pouring:false, pid:null})),
-    lives:LIVES, served:0, money:0, freeCount:0, peeks:0, mistakes:0, lastFail:'wrong',
-    pending:[], events:{uncle1:false, uncle2:false, uncle3:false, deliv1:false, deliv2:false, rush:false},
+    lives:LIVES, served:0, income:0, loss:0, freeCount:0, peeks:0, mistakes:0, lastFail:'wrong',
+    events:{uncle1:false, uncle2:false, uncle3:false, deliv1:false, deliv2:false, rush:false},
     lastFirst:null,
   };
 }
 
-/* ================= 客人 ================= */
-function newCustomer(o={}){
+/* ================= 帳本 ================= */
+function earn(n, label){ if (!n) return; S.income += n; floater(`+$${n}${label?' '+label:''}`); renderLedger(); }
+function lose(n, label){ if (!n) return; S.loss += n; floater(`-$${n}${label?' '+label:''}`, true); renderLedger(); }
+
+/* ================= 訂單 ================= */
+function newOrder(o={}){
   const order = o.order || genOrder(S.gt);
-  const maxP = o.patience || (lerp(32, 20, S.gt/GAME_LEN) + order.length*6);
+  const maxP = o.patience || (lerp(36, 24, S.gt/GAME_LEN) + order.length*8);
   S.spawned++;
   return {
     id:++S.cid, where: rand()<.5 ? '內用' : '外帶',
@@ -507,7 +559,7 @@ function newCustomer(o={}){
     type:o.type||'normal', hidden:!!o.hidden, free:false, greeted:false, changeAt:null,
   };
 }
-function spawn(c){ S.queue.push(c); renderFront(); }
+function spawn(c){ S.queue.push(c); renderTicket(); }
 
 function onFirstChanged(){
   const c = S.queue[0];
@@ -516,48 +568,66 @@ function onFirstChanged(){
   sfx.chime();
   const tk = $('#ticket'); tk.classList.remove('pop'); void tk.offsetWidth; tk.classList.add('pop');
   if (c.type === 'uncle' && !c.hidden) setTimeout(()=>custSay('常客阿伯：記住我點什麼喔！'), 600);
-  else if (S.gt > 80 && c.order.some((o,i)=>!c.done[i] && o.type==='egg_pancake' && o.tops.length < 3) && rand() < .22)
+  else if (S.gt > 80 && c.order.some((o,i)=>!c.done[i] && o.kind==='main' && o.tops.length < 3) && rand() < .22)
     c.changeAt = S.gt + rnd(3, 7);
 }
 
-function customerLeaves(c){
+function orderTimeout(c){
   S.queue.splice(S.queue.indexOf(c), 1);
   S.spawnT = 1;
   mistake('leave', pickAny(LINES.leave), '超時了，這單沒了');
-  renderFront();
+  renderTicket();
 }
 
 function completeOrder(c){
-  const tip = !c.free && c.p/c.maxP > .5 ? 10 : 0;
-  S.money += tip; S.served++;
+  S.served++;
   if (c.free) S.freeCount++;
+  else if (c.p/c.maxP > .5) setTimeout(()=>earn(10, '小費'), 300);
   S.queue.shift();
   S.spawnT = .6;
   sfx.cash();
-  if (tip) setTimeout(()=>floater('出餐快，小費 +$10'), 250);
   bossSay(c.free ? '這單請客了…' : '出餐完成！');
-  renderHUD(); renderFront();
+  renderHUD(); renderTicket();
   if (S.served >= GOAL) endGame(true);
 }
 
-/* 交餐：只能交給第一位客人 */
+/* 出餐：交給目前這張單 */
 function deliver(item){
   const c = S.queue[0];
   if (!c){ toast('還沒有訂單喔～'); return false; }
-  const idx = c.order.findIndex((o,i)=>!c.done[i] && o.key === item.key);
-  if (idx >= 0){
-    c.done[idx] = true; sfx.ding();
-    if (!c.free){ const earn = c.order[idx].price; c.earned += earn; S.money += earn; floater(`+$${earn}`); renderHUD(); }
+  let best = -1, kind = null;
+  c.order.forEach((o,i)=>{
+    if (c.done[i]) return;
+    const r = compare(o, item);
+    if (r === 'exact' && kind !== 'exact'){ best = i; kind = r; }
+    else if (r === 'over' && !kind){ best = i; kind = r; }
+  });
+  if (best >= 0){
+    const want = c.order[best];
+    c.done[best] = true; sfx.ding();
+    if (c.free) lose(costOf(item), '請客');
+    else {
+      c.earned += want.price; earn(want.price);
+      if (kind === 'over'){
+        const extra = item.price - want.price;
+        setTimeout(()=>lose(extra, '給太多'), 250);
+        sfx.meh();
+        toast(want.kind === 'drink' ? `做成大杯，只能收中杯的錢` : `多加了料，只能收原本的錢`);
+      }
+    }
     if (c.done.every(Boolean)) completeOrder(c); else renderTicket();
     return true;
   }
+  // 送錯或少給
   const sameType = c.order.some((o,i)=>!c.done[i] && o.type === item.type);
   let line;
   if (item.kind === 'drink' && sameType) line = pickAny(LINES.wrongDrink);
   else line = pickAny(sameType ? LINES.wrongDetail : LINES.wrongItem);
-  let sub = '沒關係～這單就請客吧';
-  if (!c.free && c.earned){ S.money -= c.earned; sub = `這單改請客（-$${c.earned}）`; c.earned = 0; }
+  let sub = '這單就請客吧';
+  if (!c.free && c.earned){ S.income -= c.earned; S.loss += c.earned; sub = `這單改請客（退 $${c.earned}）`; c.earned = 0; }
   c.free = true;
+  S.loss += costOf(item);
+  renderLedger();
   const tk = $('#ticket'); tk.classList.remove('mad'); void tk.offsetWidth; tk.classList.add('mad');
   mistake('wrong', line, sub);
   renderTicket();
@@ -587,42 +657,82 @@ function mistake(kind, line, sub){
 }
 
 /* ================= 煎台 ================= */
-function placeGrill(type, btn){
+function placeGrill(type, el){
   const i = S.slots.findIndex(s=>!s);
   if (i < 0){ toast('煎台滿了！'); shakeEl($('#grill')); return; }
-  S.slots[i] = {type, tops:[], t:0, state:'cook', born:++S.born, clearIn:0};
-  S.selected = i;
-  sfx.plop(); renderSlot(i); renderSelection();
+  const cat = MAINS[type] ? 'main' : SIDES[type] ? 'side' : 'fill';
+  S.slots[i] = {type, cat, tops:[], t:0, state:'cook', born:++S.born, clearIn:0};
+  if (cat !== 'fill' && (type === 'egg_pancake' || type === 'noodle')) S.sel = {w:'g', i};
+  sfx.plop(); renderSlot(i); renderSel();
 }
+function slotItem(s){ return s.cat === 'main' ? makeItem('main', s.type, s.tops) : makeItem('side', s.type, s.tops); }
 function tapSlot(i){
   const s = S.slots[i]; if (!s) return;
   if (s.state === 'burnt'){ clearSlot(i); return; }
-  if (s.state === 'ready'){
-    if (deliver(makeItem('grill', s.type, s.tops))) clearSlot(i);
+  if (s.cat === 'fill'){
+    if (s.state !== 'ready'){ toast(`${ING[s.type].name}還沒熟`); return; }
+    if (addIng(s.type, null, i)) clearSlot(i);
     return;
   }
-  S.selected = i; renderSelection(); sfx.tick();
+  if (s.state === 'ready'){ if (deliver(slotItem(s))) clearSlot(i); return; }
+  if (s.type === 'egg_pancake' || s.type === 'noodle'){ S.sel = {w:'g', i}; renderSel(); sfx.tick(); }
 }
-function clearSlot(i){ S.slots[i] = null; if (S.selected === i) S.selected = null; renderSlot(i); renderSelection(); }
-function addTop(id, el){
-  const T = TOPS[id];
-  let i = S.selected;
-  const ok = k => S.slots[k] && S.slots[k].type === T.for && S.slots[k].state !== 'burnt';
-  if (i == null || !ok(i)){
-    // 自動找最新一份可以加這個料的
-    let best = null;
-    S.slots.forEach((s,k)=>{ if (ok(k) && (best==null || s.born > S.slots[best].born)) best = k; });
-    i = best;
+function tossSlot(i){
+  const s = S.slots[i]; if (!s) return;
+  if (s.state !== 'burnt') lose(costOf(s.cat === 'fill' ? {price:ING[s.type].price} : slotItem(s)), '丟掉');
+  clearSlot(i);
+}
+function clearSlot(i){ S.slots[i] = null; if (S.sel && S.sel.w==='g' && S.sel.i===i) S.sel = null; renderSlot(i); renderSel(); }
+
+/* ================= 工作台（三明治、漢堡、飯糰） ================= */
+function placeBase(type){
+  const i = S.board.findIndex(b=>!b);
+  if (i < 0){ toast('工作台滿了！先送出或丟掉'); shakeEl($('#boards')); return; }
+  S.board[i] = {type, tops:[], born:++S.born};
+  S.sel = {w:'b', i};
+  sfx.plop(); renderBoard(i); renderSel();
+}
+function sendBoard(i){
+  const b = S.board[i]; if (!b) return;
+  if (deliver(makeItem('main', b.type, b.tops))){ S.board[i] = null; if (S.sel && S.sel.w==='b' && S.sel.i===i) S.sel = null; renderBoard(i); renderSel(); }
+}
+function tossBoard(i){
+  const b = S.board[i]; if (!b) return;
+  lose(costOf(makeItem('main', b.type, b.tops)), '丟掉');
+  S.board[i] = null; if (S.sel && S.sel.w==='b' && S.sel.i===i) S.sel = null; renderBoard(i); renderSel();
+}
+
+/* ================= 加料：加到選取的那份（蛋餅、鐵板麵、工作台） ================= */
+function targetOf(ref){
+  if (!ref) return null;
+  const x = ref.w === 'g' ? S.slots[ref.i] : S.board[ref.i];
+  if (!x) return null;
+  if (ref.w === 'g' && (x.cat !== 'main' && x.type !== 'noodle' || x.state === 'burnt')) return null;
+  return x;
+}
+function accepts(x, id){
+  if (ING[id].sauce) return x.type === 'noodle';
+  return !!MAINS[x.type] && MAINS[x.type].fill.includes(id);
+}
+function addIng(id, el){
+  let ref = S.sel, x = targetOf(ref);
+  if (!x || !accepts(x, id)){
+    ref = null; let bestBorn = -1;
+    const consider = (w, i) => { const r = {w, i}, y = targetOf(r); if (y && accepts(y, id) && !y.tops.includes(id) && y.born > bestBorn){ ref = r; bestBorn = y.born; } };
+    S.slots.forEach((_,i)=>consider('g', i)); S.board.forEach((_,i)=>consider('b', i));
+    x = targetOf(ref);
   }
-  if (i == null){
-    toast(T.for === 'noodle' ? '先把鐵板麵放上煎台' : '先把蛋餅放上煎台');
-    shakeEl(el); return;
+  const N = ING[id].name;
+  if (!x){
+    const where = ING[id].sauce ? '鐵板麵' : Object.values(MAINS).filter(m=>m.fill.includes(id)).map(m=>m.name).join('、');
+    toast(`${N}可以加在：${where}`); shakeEl(el); return false;
   }
-  const s = S.slots[i];
-  if (T.sauce) s.tops = [id];
-  else { if (s.tops.includes(id)){ toast(`已經加過${T.name}了`); return; } s.tops.push(id); }
-  S.selected = i;
-  sfx.tick(); renderSlot(i); renderSelection();
+  if (ING[id].sauce) x.tops = [id];
+  else { if (x.tops.includes(id)){ toast(`已經加過${N}了`); return false; } x.tops.push(id); }
+  S.sel = ref; sfx.tick();
+  if (ref.w === 'g') renderSlot(ref.i); else renderBoard(ref.i);
+  renderSel();
+  return true;
 }
 
 /* ================= 飲料 ================= */
@@ -645,45 +755,40 @@ function loop(ts){
 }
 function update(dt){
   S.gt += dt;
-  const t = S.gt;
+  const t = S.gt, E = S.events, P = S.pending;
 
-  // 特殊事件
-  const E = S.events;
-  const P = S.pending;
-  if (!E.uncle1 && S.spawned >= 2){ E.uncle1 = true; P.push(newCustomer({type:'uncle', order:UNCLE_ORDER(), patience:45})); }
-  if (!E.uncle2 && t > 125){ E.uncle2 = true; P.push(newCustomer({type:'uncle', order:UNCLE_ORDER(), patience:42, hidden:true})); }
-  if (!E.uncle3 && t > 235){ E.uncle3 = true; P.push(newCustomer({type:'uncle', order:UNCLE_ORDER(), patience:38, hidden:true})); }
-  if (!E.deliv1 && t > 150){ E.deliv1 = true; P.push(newCustomer({type:'delivery', order:genOrder(t,4), patience:48})); }
-  if (!E.deliv2 && t > 250){ E.deliv2 = true; P.push(newCustomer({type:'delivery', order:genOrder(t,4), patience:44})); }
+  if (!E.uncle1 && S.spawned >= 2){ E.uncle1 = true; P.push(newOrder({type:'uncle', order:UNCLE_ORDER(), patience:55})); }
+  if (!E.uncle2 && t > 125){ E.uncle2 = true; P.push(newOrder({type:'uncle', order:UNCLE_ORDER(), patience:50, hidden:true})); }
+  if (!E.uncle3 && t > 235){ E.uncle3 = true; P.push(newOrder({type:'uncle', order:UNCLE_ORDER(), patience:46, hidden:true})); }
+  if (!E.deliv1 && t > 150){ E.deliv1 = true; P.push(newOrder({type:'delivery', order:genOrder(t,4), patience:62})); }
+  if (!E.deliv2 && t > 250){ E.deliv2 = true; P.push(newOrder({type:'delivery', order:genOrder(t,4), patience:58})); }
   if (!E.rush && t > 200){ E.rush = true; toast('上班上課尖峰！訂單變大了'); }
 
-  // 來單：一次一張，完成才出下一張
+  // 一次一張單，完成才出下一張
   if (!S.queue.length){
     S.spawnT -= dt;
     if (S.spawnT <= 0){
-      const c = P.shift() || newCustomer();
+      const c = P.shift() || newOrder();
       if (c.type === 'delivery') toast('外送單！一次 4 樣！');
       spawn(c);
     }
   }
-
-  // 訂單倒數
   for (const c of S.queue.slice()){
     c.p -= dt;
-    if (c.p <= 0){ customerLeaves(c); if (S.over) return; }
+    if (c.p <= 0){ orderTimeout(c); if (S.over) return; }
   }
   // 改單
   const f = S.queue[0];
   if (f && f.changeAt && t >= f.changeAt){
     f.changeAt = null;
-    const idx = f.order.findIndex((o,i)=>!f.done[i] && o.type==='egg_pancake' && o.tops.length < 3);
+    const idx = f.order.findIndex((o,i)=>!f.done[i] && o.kind==='main' && o.tops.length < 3);
     if (idx >= 0){
-      const add = EGG_TOPS.filter(x=>!f.order[idx].tops.includes(x));
+      const o = f.order[idx];
+      const add = MAINS[o.type].fill.filter(x=>!o.tops.includes(x));
       const top = pick(add);
-      f.order[idx] = makeItem('grill','egg_pancake', f.order[idx].tops.concat(top));
+      f.order[idx] = makeItem('main', o.type, o.tops.concat(top));
       f.order[idx].changed = true;
-      const line = `啊等等！蛋餅加${TOPS[top].name}！`;
-      custSay(line); sfx.tick();
+      custSay(`改單！${MAINS[o.type].name}加${ING[top].name}！`); sfx.tick();
       renderTicket();
     }
   }
@@ -695,11 +800,13 @@ function update(dt){
   S.slots.forEach((s,i)=>{
     if (!s) return;
     s.t += dt;
-    const cook = GRILL[s.type].cook;
-    if (s.state === 'cook' && s.t >= cook){ s.state = 'ready'; sfx.ready(); }
+    const cook = cookOf(s.type);
+    if (s.state === 'cook' && s.t >= cook){ s.state = 'ready'; sfx.ready(); renderSlot(i); }
     if (s.state === 'ready' && s.t >= cook + win){
       s.state = 'burnt'; s.clearIn = 1.6;
-      mistake('burnt', pickAny(LINES.burnt), `${GRILL[s.type].name}煎過頭了`);
+      lose(costOf(s.cat === 'fill' ? {price:ING[s.type].price} : slotItem(s)), '燒焦');
+      mistake('burnt', pickAny(LINES.burnt), `${nameOf(s.type)}煎過頭了`);
+      renderSlot(i);
     }
     if (s.state === 'burnt'){ s.clearIn -= dt; if (s.clearIn <= 0){ clearSlot(i); return; } }
     else cooking++;
@@ -717,6 +824,7 @@ function update(dt){
     if (c.level >= 100){
       c.level = 0; c.pouring = false; c.pid = null;
       const el = cupEls[i].cup; el.classList.remove('spill'); void el.offsetWidth; el.classList.add('spill');
+      lose(10, '溢出');
       mistake('spill', pickAny(LINES.spill), `${DRINKS[c.type].name}倒太滿了`);
     }
     renderCup(i);
@@ -730,20 +838,29 @@ function update(dt){
 }
 
 /* ================= 畫面 ================= */
-const grillEl = $('#grill'), slotEls = [], cupEls = [];
+const slotEls = [], cupEls = [], boardEls = [];
 function buildKitchen(){
-  grillEl.innerHTML = '';
-  for (let i=0;i<4;i++){
+  const grill = $('#grill'); grill.innerHTML = '';
+  for (let i=0;i<S.slots.length;i++){
     const d = document.createElement('div');
     d.className = 'slot'; d.dataset.act = 'slot'; d.dataset.v = i;
     d.innerHTML = '<div class="ring"></div><div class="food"></div><div class="tops"></div><div class="smoke"></div><button class="toss" data-act="toss" data-v="'+i+'" aria-label="丟掉">✕</button>';
-    grillEl.appendChild(d);
-    slotEls.push({el:d, food:d.querySelector('.food'), ring:d.querySelector('.ring'), tops:d.querySelector('.tops'), smoke:d.querySelector('.smoke')});
+    grill.appendChild(d);
+    slotEls[i] = {el:d, food:d.querySelector('.food'), ring:d.querySelector('.ring'), tops:d.querySelector('.tops'), smoke:d.querySelector('.smoke')};
   }
-  $('#starters').innerHTML = Object.entries(GRILL).map(([k,g])=>
-    `<button class="btn" data-act="grill" data-v="${k}">${foodSVG(k, k==='noodle'?[]:[])}<span>${g.name}</span></button>`).join('');
-  $('#topsRow').innerHTML = Object.entries(TOPS).map(([k,t])=>
-    `<button class="chip ${t.sauce?'sauce':''}" data-act="top" data-v="${k}"><i style="background:${t.color}"></i>${t.name}</button>`).join('');
+  const boards = $('#boards'); boards.innerHTML = '';
+  for (let i=0;i<S.board.length;i++){
+    const d = document.createElement('div');
+    d.className = 'board'; d.dataset.act = 'board'; d.dataset.v = i;
+    boards.appendChild(d); boardEls[i] = d;
+  }
+  const g = (t, label) => `<button class="ing g" data-act="grill" data-v="${t}">${foodSVG(t)}<span>${label}</span></button>`;
+  const b = t => `<button class="ing b" data-act="base" data-v="${t}">${foodSVG(t)}<span>${MAINS[t].name.replace('三明治','吐司')}</span></button>`;
+  const c = t => `<button class="ing c ${ING[t].sauce?'s':''}" data-act="ing" data-v="${t}"><i style="background:${ING[t].color}"></i>${ING[t].name}</button>`;
+  $('#ings').innerHTML =
+    g('egg_pancake','蛋餅皮') + b('toast') + b('burger') + b('riceball') + g('radish','蘿蔔糕') + g('noodle','鐵板麵') +
+    g('egg','荷包蛋') + g('bacon','培根') + g('chop','豬排') + g('chicken','卡拉雞') + g('hashbrown','薯餅') + g('hotdog','熱狗') +
+    ['pork','cheese','corn','tuna','ham','lettuce','tomato','cucumber','youtiao','radishd','pepper','mush'].map(c).join('');
   $('#cups').innerHTML = Object.entries(DRINKS).map(([k,d],i)=>`
     <div class="station">
       <div class="cup" data-act="pour" data-v="${i}">
@@ -760,17 +877,17 @@ function buildKitchen(){
   document.querySelectorAll('.station').forEach((st,i)=>{
     cupEls[i] = {cup:st.querySelector('.cup'), liq:st.querySelector('.liq'), send:st.querySelector('.send'), dump:st.querySelector('[data-act=dump]')};
   });
-  $('#shelf').innerHTML = Object.entries(SHELF).map(([k,s])=>
-    `<button class="btn" data-act="shelf" data-v="${k}">${foodSVG(k)}<span>${s.name}</span></button>`).join('');
 }
 function renderSlot(i){
   const s = S.slots[i], E = slotEls[i];
   E.el.classList.toggle('has', !!s);
   E.el.classList.remove('ready','warn');
   E.smoke.classList.remove('on');
+  const old = E.el.querySelector('.hint'); if (old) old.remove();
   if (!s){ E.food.innerHTML = '<span class="empty">空</span>'; E.food.style.filter=''; E.ring.style.setProperty('--p',0); E.tops.innerHTML=''; return; }
   E.food.innerHTML = foodSVG(s.type, s.tops);
-  E.tops.innerHTML = s.tops.map(t=>`<b>${TOPS[t].name}</b>`).join('');
+  E.tops.innerHTML = s.tops.map(t=>`<b>${ING[t].name}</b>`).join('');
+  if (s.cat === 'fill' && s.state === 'ready') E.el.insertAdjacentHTML('beforeend', '<span class="hint">點我夾去配</span>');
 }
 function paintSlot(i, s, cook, win){
   const E = slotEls[i];
@@ -790,7 +907,17 @@ function paintSlot(i, s, cook, win){
     E.el.classList.remove('ready','warn'); E.smoke.classList.add('on');
   }
 }
-function renderSelection(){ slotEls.forEach((E,i)=>E.el.classList.toggle('sel', S.selected === i && !!S.slots[i])); }
+function renderBoard(i){
+  const b = S.board[i], d = boardEls[i];
+  if (!b){ d.innerHTML = '<span class="empty">工作台：放吐司、漢堡、飯糰</span>'; return; }
+  d.innerHTML = `<div class="bimg">${foodSVG(b.type)}</div>
+    <div class="btags"><span class="bname">${MAINS[b.type].name}</span>${b.tops.length ? b.tops.map(t=>`<b>${ING[t].name}</b>`).join('') : '<b style="opacity:.6">還沒加料</b>'}</div>
+    <div class="bbtns"><button class="send" data-act="bsend" data-v="${i}">送</button><button data-act="btoss" data-v="${i}" aria-label="丟掉">丟</button></div>`;
+}
+function renderSel(){
+  slotEls.forEach((E,i)=>E.el.classList.toggle('sel', !!(S.sel && S.sel.w==='g' && S.sel.i===i && S.slots[i])));
+  boardEls.forEach((d,i)=>d.classList.toggle('sel', !!(S.sel && S.sel.w==='b' && S.sel.i===i && S.board[i])));
+}
 function renderCup(i){
   const c = S.cups[i], E = cupEls[i];
   E.liq.style.height = c.level + '%';
@@ -799,12 +926,11 @@ function renderCup(i){
   E.send.disabled = E.dump.disabled = c.level < 3 || c.pouring;
 }
 
-function itemMini(o){ return `<span class="mini">${foodSVG(o.type, o.tops)}</span>`; }
+function itemMini(o){ return `<span class="mini">${foodSVG(o.type, o.kind==='main' && o.type!=='egg_pancake' ? [] : o.tops)}</span>`; }
 function whoOf(c){ return c.type==='delivery' ? '外送單' : c.type==='uncle' ? '常客阿伯' : c.where; }
-function renderFront(){ renderTicket(); }
 function renderTicket(){
   const c = S.queue[0], tk = $('#ticket');
-  if (!c){ tk.innerHTML = '<div class="waiting">等客人中…</div>'; return; }
+  if (!c){ tk.innerHTML = '<div class="waiting">等訂單中…</div>'; return; }
   const head = `<div class="tk-head"><span>#${String(c.id).padStart(3,'0')}</span><span class="who">${whoOf(c)}</span><div class="pbar"><i></i></div><span class="sum">${c.hidden ? '' : '$'+c.order.reduce((a,o)=>a+o.price,0)}</span></div>`;
   if (c.hidden){
     tk.innerHTML = head + `<div class="secret" data-act="peek"><b>「老樣子！」</b><small>想不起來？點這裡偷看（會扣時間）</small></div>`;
@@ -821,10 +947,17 @@ function paintPatience(){
     b.style.background = r > .5 ? 'var(--scallion)' : r > .25 ? 'var(--yolk)' : 'var(--tomato)';
   }
 }
+function bump(el){ el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+function renderLedger(){
+  const net = S.income - S.loss;
+  const set = (id, v) => { const el = $(id); if (el.textContent !== v){ el.textContent = v; bump(el); } };
+  set('#inc', '$' + S.income.toLocaleString());
+  set('#loss', '$' + S.loss.toLocaleString());
+  set('#net', (net < 0 ? '-$' : '$') + Math.abs(net).toLocaleString());
+  $('#netWrap').classList.toggle('neg', net < 0);
+}
 function renderHUD(){
   $('#served').textContent = `${S.served}/${GOAL}`;
-  const m = $('#money'), txt = '$' + S.money.toLocaleString();
-  if (m.textContent !== txt){ m.textContent = txt; m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump'); }
   let h = '';
   for (let i=0;i<LIVES;i++) h += `<span class="${i < S.lives ? '' : 'gone'}">🍳</span>`;
   $('#lives').innerHTML = h;
@@ -835,16 +968,15 @@ function renderTimer(){
   el.classList.toggle('hurry', left < 30);
 }
 
-/* ---------- 提示泡泡 ---------- */
-let toastT, bossT, custT;
-function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 1300); }
+/* ---------- 提示 ---------- */
+let toastT, bossT, custT, floatN = 0;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 1400); }
 function bossSay(msg){ const b = $('#bossSay'); b.textContent = msg; b.classList.add('show'); clearTimeout(bossT); bossT = setTimeout(()=>b.classList.remove('show'), 1800); }
-function custSay(msg){ const b = $('#custSay'); b.textContent = msg; b.classList.add('show'); clearTimeout(custT); custT = setTimeout(()=>b.classList.remove('show'), 2200); }
-function floater(text, sad){
-  const f = document.createElement('div'); f.className = 'floater'; f.textContent = text;
-  if (sad) f.style.color = 'var(--tomato)';
-  f.style.right = '24px'; f.style.top = '60px';
-  $('#app').appendChild(f); setTimeout(()=>f.remove(), 1000);
+function custSay(msg){ const b = $('#custSay'); b.textContent = msg; b.classList.add('show'); clearTimeout(custT); custT = setTimeout(()=>b.classList.remove('show'), 2400); }
+function floater(text, bad){
+  const f = document.createElement('div'); f.className = 'floater' + (bad ? ' bad' : ''); f.textContent = text;
+  f.style.right = '20px'; f.style.top = (70 + (floatN++ % 3) * 22) + 'px';
+  $('#app').appendChild(f); setTimeout(()=>f.remove(), 1100);
 }
 function shakeEl(el){ if (!el) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
 
@@ -855,22 +987,23 @@ document.addEventListener('pointerdown', e => {
   e.preventDefault();
   sfx.init();
   const a = el.dataset.act, v = el.dataset.v;
-  if (el.classList.contains('btn') || el.classList.contains('chip')){ el.classList.add('press'); setTimeout(()=>el.classList.remove('press'), 90); }
+  if (el.classList.contains('ing')){ el.classList.add('press'); setTimeout(()=>el.classList.remove('press'), 90); }
   switch(a){
     case 'grill': placeGrill(v, el); break;
-    case 'top': addTop(v, el); break;
+    case 'base': placeBase(v); break;
+    case 'ing': addIng(v, el); break;
     case 'slot': tapSlot(+v); break;
-    case 'toss': clearSlot(+v); break;
-    case 'shelf': deliver(makeItem('shelf', v)); break;
+    case 'toss': tossSlot(+v); break;
+    case 'board': if (S.board[+v]){ S.sel = {w:'b', i:+v}; renderSel(); sfx.tick(); } break;
+    case 'bsend': sendBoard(+v); break;
+    case 'btoss': tossBoard(+v); break;
     case 'send': serveCup(+v); break;
-    case 'dump': S.cups[+v].level = 0; renderCup(+v); break;
-    case 'pour': {
-      const c = S.cups[+v]; c.pouring = true; c.pid = e.pointerId; renderCup(+v); break;
-    }
+    case 'dump': { const c = S.cups[+v]; if (c.level >= 3) lose(5, '倒掉'); c.level = 0; renderCup(+v); break; }
+    case 'pour': { const c = S.cups[+v]; c.pouring = true; c.pid = e.pointerId; renderCup(+v); break; }
     case 'peek': {
       const c = S.queue[0]; if (!c) break;
       c.hidden = false; c.p -= c.maxP * .25; S.peeks++;
-      custSay(pickAny(LINES.peek)); renderFront(); break;
+      custSay(pickAny(LINES.peek)); renderTicket(); break;
     }
   }
 }, {passive:false});
@@ -884,30 +1017,45 @@ document.addEventListener('contextmenu', e=>e.preventDefault());
 function showCard(html){ $('#card').innerHTML = html; $('#overlay').hidden = false; }
 function hideCard(){ $('#overlay').hidden = true; }
 
+function esc(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function startScreen(){
   showCard(`
-    <h1>帥哥美女早餐店</h1>
-    <p class="big">你是早餐店老闆。<br>五分鐘出完 <b>20 張單</b>！<br>每樣菜都有價錢，看你今天賺多少。</p>
+    <h1>今天要開什麼店？</h1>
+    <div class="namerow">
+      <input id="shopName" maxlength="10" value="${esc(shopName)}" aria-label="店名" autocomplete="off">
+      <button id="dice" aria-label="隨機店名">🎲</button>
+    </div>
+    <p class="big">五分鐘出完 <b>20 張單</b>，看今天淨賺多少！</p>
     <ul>
-      <li>點<b>蛋餅、蘿蔔糕…</b>放上煎台，再點<b>肉鬆、起司…</b>加料</li>
-      <li>綠圈亮了點一下出餐，<b>拖太久會焦</b></li>
-      <li><b>按住杯子</b>倒飲料，停在中杯或大杯的線之間，按「送」</li>
-      <li>一次一張單，做完才會來下一張，超時就飛走了</li>
-      <li>做錯（料不對、燒焦、溢出、超時）<b>3 次就倒店</b>，送錯那單就變請客</li>
+      <li><b>蛋餅</b>：放蛋餅皮上煎台，再點料加上去，煎好點一下出餐</li>
+      <li><b>三明治、漢堡、飯糰</b>：放到工作台，加料後按「送」</li>
+      <li>有 🔥 的料要先煎，熟了點一下就夾去配</li>
+      <li><b>按住杯子</b>倒飲料，停在中杯或大杯的線之間</li>
+      <li>給多了（中杯做成大杯、多加料）只收原本的錢；<b>給少了就變免費</b></li>
+      <li>送錯、燒焦、溢出、超時 <b>3 次就倒店</b></li>
     </ul>
-    <button class="cta" id="startBtn">開店！</button>
-    <p style="font-size:12px;color:var(--ink-soft)">一開始可以慢慢用一隻手指玩，後面會忙到要兩隻手。</p>`);
-  $('#startBtn').onclick = startGame;
+    <button class="cta" id="startBtn">開店！</button>`);
+  const input = $('#shopName');
+  input.addEventListener('pointerdown', e=>e.stopPropagation());
+  $('#dice').onclick = () => {
+    const d = $('#dice'); d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll');
+    sfx.init();
+    let n = 0;
+    const iv = setInterval(()=>{
+      let next; do { next = pickAny(SHOP_NAMES); } while (next === input.value && SHOP_NAMES.length > 1);
+      input.value = next; sfx.tick();
+      if (++n >= 8){ clearInterval(iv); sfx.ding(); }
+    }, 60);
+  };
+  $('#startBtn').onclick = () => { setShopName(input.value); startGame(); };
 }
 function startGame(){
   sfx.init();
-  const keepSound = soundOn;
   S = freshState(); seed = (Date.now() ^ 0x5f3759df) >>> 0;
-  soundOn = keepSound;
   S.running = true;
   sfx.bgmStart();
-  S.slots.forEach((_,i)=>renderSlot(i)); S.cups.forEach((_,i)=>renderCup(i));
-  renderSelection(); renderHUD(); renderFront(); renderTimer();
+  S.slots.forEach((_,i)=>renderSlot(i)); S.board.forEach((_,i)=>renderBoard(i)); S.cups.forEach((_,i)=>renderCup(i));
+  renderSel(); renderHUD(); renderTicket(); renderTimer(); renderLedger();
   hideCard();
 }
 function pause(on){
@@ -917,38 +1065,43 @@ function pause(on){
   if (on) sfx.bgmStop(); else sfx.bgmStart();
   S.cups.forEach((c,i)=>{ c.pouring = false; renderCup(i); });
   if (on){
-    showCard(`<h2>休息一下</h2><p>客人會等你，煎台也先關火。</p><button class="cta" id="resumeBtn">繼續營業</button><button class="ghostbtn" id="quitBtn">不開了，重新來</button>`);
+    showCard(`<h2>休息一下</h2><p>煎台先關火，訂單也會等你。</p><button class="cta" id="resumeBtn">繼續營業</button><button class="ghostbtn" id="quitBtn">不開了，重新來</button>`);
     $('#resumeBtn').onclick = ()=>pause(false);
     $('#quitBtn').onclick = ()=>{ S.over = true; sfx.bgmStop(); startScreen(); };
   } else hideCard();
 }
 function getTitle(){
-  const used = S.gt, m = S.mistakes;
+  const used = S.gt, m = S.mistakes, net = S.income - S.loss;
+  if (net < 0) return ['佛心做功德老闆','今天淨賺是負的，土地公有記下來了。'];
   if (m === 0 && used < 210) return ['早餐界米其林三星','評審吃完蛋餅當場落淚，說這是他阿嬤的味道。'];
   if (m === 0) return ['零失誤煎台之神','煎台看到你都自動降溫三度表示尊敬。'];
+  if (net >= 1500) return ['早餐店股神','今天賺的錢夠再開一間分店。'];
   if (used < 190) return ['蛋餅閃電俠','客人「我要…」還沒講完，你已經出餐了。'];
-  if (S.freeCount >= 3) return ['佛心請客大老闆','今天的營收都拿去做功德了。'];
+  if (S.loss >= 200) return ['料多實在大慈善家','客人都說你家料給很大方，會計在哭。'];
   if (S.peeks >= 2) return ['阿伯老樣子翻譯機','阿伯說你比他兒子還懂他。'];
   if (m === 2) return ['九命怪貓店長','差點倒店，但店裡的貓保佑你活下來了。'];
-  return ['帥哥美女早安認證店長','你的「帥哥早安」比你的蛋餅還有名。'];
+  return ['帥哥美女早安認證店長','你的「早安」比你的蛋餅還有名。'];
 }
 function endGame(win, reason){
   if (S.over) return;
   S.over = true; S.running = false;
   sfx.sizzle(0); sfx.pour(false); sfx.bgmStop();
   const mm = Math.floor(S.gt/60), ss = String(Math.floor(S.gt%60)).padStart(2,'0');
-  const stats = `<div class="stat"><span>出餐 ${S.served}/${GOAL}</span><span>用時 ${mm}:${ss}</span><span>失誤 ${S.mistakes}</span><span>營收 $${S.money}</span></div>`;
+  const net = S.income - S.loss;
+  const books = `<div class="books"><div>收入<b>$${S.income}</b></div><div>賠掉<b>$${S.loss}</b></div><div>淨賺<b style="color:${net<0?'var(--tomato)':'var(--scallion)'}">${net<0?'-':''}$${Math.abs(net)}</b></div></div>`;
+  const stats = `<div class="stat"><span>出餐 ${S.served}/${GOAL}</span><span>用時 ${mm}:${ss}</span><span>失誤 ${S.mistakes}</span></div>`;
   if (win){
     const [title, quip] = getTitle();
     sfx.win();
-    showCard(`<h2>過關！</h2><p>你獲得封號</p><div class="titleBadge">${title}</div><p class="big">${quip}</p>${stats}<button class="cta" id="againBtn">再開一次店</button>`);
+    showCard(`<h2>「${esc(shopName)}」過關！</h2><p>老闆獲得封號</p><div class="titleBadge">${title}</div><p class="big">${quip}</p>${books}${stats}<button class="cta" id="againBtn">明天再開店</button><button class="ghostbtn" id="renameBtn">換個店名</button>`);
   } else {
     const k = reason || S.lastFail;
     const line = pickAny(FAIL[k] || FAIL.wrong);
     sfx.lose();
-    showCard(`<h2>${k==='timeup'?'打烊了…':'倒店了…'}</h2><p class="big">${line}</p>${stats}<button class="cta" id="againBtn">不服，再來</button>`);
+    showCard(`<h2>「${esc(shopName)}」${k==='timeup'?'打烊了…':'倒店了…'}</h2><p class="big">${line}</p>${books}${stats}<button class="cta" id="againBtn">不服，再來</button><button class="ghostbtn" id="renameBtn">換個店名重開</button>`);
   }
   $('#againBtn').onclick = startGame;
+  $('#renameBtn').onclick = startScreen;
 }
 
 $('#pauseBtn').onclick = () => pause(!(S && S.paused));
@@ -960,9 +1113,10 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) pause
 
 /* ================= 啟動 ================= */
 S = freshState();
+setShopName(shopName);
 buildKitchen();
-S.slots.forEach((_,i)=>renderSlot(i)); S.cups.forEach((_,i)=>renderCup(i));
-renderHUD(); renderFront(); renderTimer();
+S.slots.forEach((_,i)=>renderSlot(i)); S.board.forEach((_,i)=>renderBoard(i)); S.cups.forEach((_,i)=>renderCup(i));
+renderHUD(); renderTicket(); renderTimer(); renderLedger();
 startScreen();
 requestAnimationFrame(loop);
 })();
