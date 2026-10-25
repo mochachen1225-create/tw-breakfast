@@ -38,9 +38,11 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 /* ---------- HUD 招牌 ---------- */
 .hud{flex:0 0 auto;display:flex;align-items:center;gap:8px;background:var(--tomato);color:#fff;
   margin:0 -10px;padding:6px 12px;border-bottom:4px solid var(--tomato-dk)}
-.sign{font-family:var(--display);font-size:16px;letter-spacing:.06em;white-space:nowrap;text-shadow:0 2px 0 var(--tomato-dk)}
-.stats{margin-left:auto;display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;font-weight:700;font-size:14px}
+.sign{font-family:var(--display);font-size:15px;letter-spacing:.06em;white-space:nowrap;text-shadow:0 2px 0 var(--tomato-dk)}
+.stats{margin-left:auto;display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;font-weight:700;font-size:14px}
 .pill{background:rgba(0,0,0,.18);border-radius:999px;padding:2px 8px;white-space:nowrap}
+#money{background:var(--yolk);color:var(--ink)}
+#money.bump{animation:pulse .15s 2 alternate}
 #timer.hurry{background:var(--yolk);color:var(--ink);animation:pulse .6s infinite alternate}
 #lives{letter-spacing:-2px;white-space:nowrap;font-size:13px}
 #lives .gone{filter:grayscale(1);opacity:.35}
@@ -51,16 +53,19 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .pbar{width:70px;height:6px;border-radius:4px;background:rgba(59,42,32,.15);overflow:hidden;flex:0 0 auto}
 .pbar i{display:block;height:100%;width:100%;background:var(--scallion);border-radius:4px;transform-origin:left}
 .tag{font-size:11px;font-weight:700;color:var(--ink-soft)}
-.ticket{background:var(--paper);border-radius:16px;box-shadow:0 3px 0 rgba(59,42,32,.15);padding:6px 10px 8px;
-  display:flex;flex-direction:column;gap:4px;position:relative;min-height:74px;box-sizing:border-box}
-.ticket::after{content:"";position:absolute;left:22px;bottom:-9px;border:9px solid transparent;border-bottom:0;border-top-color:var(--paper)}
+.ticket{background:var(--paper);border-radius:6px;box-shadow:0 3px 0 rgba(59,42,32,.15);padding:8px 10px 10px;
+  display:flex;flex-direction:column;gap:6px;position:relative;min-height:96px;box-sizing:border-box;
+  border-top:6px dashed var(--cream);background-image:repeating-linear-gradient(transparent 0 27px,rgba(228,87,46,.10) 27px 28px)}
 .ticket.pop{animation:hop .3s ease-out}
 .ticket.mad{animation:shake .3s}
 .tk-head{font-family:var(--display);font-size:13px;color:var(--tomato);display:flex;align-items:center;gap:8px}
 .tk-head .who{font-size:16px}
+.tk-head .pbar{flex:1;width:auto;height:8px}
+.tk-head .sum{color:var(--ink);font-variant-numeric:tabular-nums}
 .tk-head .cnt{margin-left:auto;color:var(--ink-soft)}
 .tk-items{display:flex;flex-wrap:wrap;gap:4px 12px;align-content:flex-start}
 .tk-item{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:700;line-height:1.15}
+.tk-item .pr{color:var(--ink-soft);font-size:11px;font-weight:700;margin-left:2px;font-variant-numeric:tabular-nums}
 .tk-item small{display:block;font-weight:500;color:var(--tomato-dk);font-size:11px}
 .tk-item.done{opacity:.4;text-decoration:line-through}
 .tk-item.changed{animation:flashBg 1s 3}
@@ -151,6 +156,16 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .shelf .btn{flex:1}
 
 /* ---------- 浮動提示 ---------- */
+#oops{position:absolute;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;pointer-events:none;margin:0 -10px;padding:16px}
+#oops .oc{background:var(--paper);border:4px solid var(--yolk);border-radius:22px;padding:16px 18px 14px;text-align:center;max-width:320px;width:100%;
+  box-shadow:0 10px 0 rgba(59,42,32,.18);transform:scale(.4) rotate(-6deg);opacity:0}
+#oops.show .oc{animation:oopsIn .38s cubic-bezier(.2,1.6,.4,1) forwards}
+#oops.hide .oc{transform:none;opacity:1;animation:oopsOut .25s ease-in forwards}
+#oops .oe{font-size:56px;line-height:1.1}
+#oops .ol{font-family:var(--display);font-size:26px;line-height:1.3;color:var(--ink);text-wrap:balance}
+#oops .os{margin-top:6px;font-weight:700;font-size:14px;color:var(--tomato)}
+@keyframes oopsIn{0%{transform:scale(.4) rotate(-6deg);opacity:0}100%{transform:scale(1) rotate(-2deg);opacity:1}}
+@keyframes oopsOut{to{transform:scale(.8) translateY(30px);opacity:0}}
 #toast{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);background:var(--ink);color:#fff;font-weight:900;padding:8px 14px;border-radius:12px;
   font-size:15px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:20;text-align:center;max-width:85%}
 #toast.show{opacity:.92}
@@ -182,6 +197,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 @keyframes flash{0%{opacity:.45}100%{opacity:0}}
 @keyframes floatUp{to{transform:translateY(-40px);opacity:0}}
 @keyframes flashBg{50%{background:var(--yolk)}}
+@media (max-width:385px){.sign{font-size:12px;letter-spacing:0}.pill{padding:2px 6px}.stats{gap:4px;font-size:13px}.iconbtn{width:26px;height:26px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
 @media (max-height:700px){.grill{min-height:110px}.kitchen{gap:5px;padding-top:6px}.cup{height:56px}.starters .btn span{font-size:11px}.btn{min-height:40px}.btn svg{width:24px;height:24px}.chip{min-height:30px}}
 </style>
@@ -193,6 +209,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
     <div class="stats">
       <span class="pill" id="timer">5:00</span>
       <span class="pill" id="served">0/20</span>
+      <span class="pill" id="money">$0</span>
       <span id="lives"></span>
       <button class="iconbtn" id="muteBtn" aria-label="聲音開關">🔊</button>
       <button class="iconbtn" id="pauseBtn" aria-label="暫停">Ⅱ</button>
@@ -203,7 +220,6 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
     <div class="say" id="bossSay"></div>
     <div class="say" id="custSay"></div>
     <div class="ticket" id="ticket"></div>
-    <div class="queue" id="queue"></div>
     <div class="counter"></div>
   </section>
 
@@ -219,6 +235,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 
   <div id="toast"></div>
   <div id="flash"></div>
+  <div id="oops"><div class="oc"><div class="oe"></div><div class="ol"></div><div class="os"></div></div></div>
 
   <div class="overlay" id="overlay">
     <div class="card" id="card"></div>
@@ -383,15 +400,15 @@ const UNCLE_ORDER = () => [makeItem('grill','radish'), makeItem('grill','fried_e
 
 /* ================= 台詞 ================= */
 const LINES = {
-  wrongDetail:['料放錯了啦！這份要免費！','我說的不是這樣！免費喔！','老闆你耳朵還沒開機喔？免費！','這不是我的口味欸…請客嗎？'],
-  wrongItem:['我沒點這個欸？？免費啦！','這誰的？那我要免費！','老闆你是不是第一天上班？'],
-  wrongDrink:['這杯是喝過再給我喔？免費！','倒這樣是在練功喔？免費啦！','大杯中杯分不清楚喔～免費！'],
-  burnt:['燒焦了啦！整間都是煙！','欸～焦掉了！黑金蛋餅喔？','煎台冒煙了啦！！'],
-  spill:['滿出來了啦！地板都是奶茶！','溢出來了！拖把拖把！'],
-  leave:['等太久，走了啦！','我去隔壁買好了…','上班要遲到了啦！'],
-  thanks:['謝謝光臨～','慢走喔～','明天再來喔～','好了喔～拿去！'],
-  peek:['連我都不記得喔…','我都來十年了欸！','唉，年輕人喔…'],
+  wrongDetail:['咦？好像不是這個口味耶…','這是…老闆的隱藏版嗎？','料好像跑錯盤了～','客人：我看起來像愛吃這個的人嗎？'],
+  wrongItem:['這個…好像沒有點耶？','哇～是招待嗎？謝謝老闆！','這份是不是要給隔壁桌的？'],
+  wrongDrink:['這杯的量…有點藝術','中杯大杯，傻傻分不清楚～','這杯是要給螞蟻喝的嗎？'],
+  burnt:['煎到可以當暖暖包了','焦香味飄到隔壁去了','這不是蛋餅，是黑金限定版'],
+  spill:['飲料在櫃台上開派對','櫃台說它喝飽了','拖把：又是我？'],
+  leave:['訂單等到睡著了','客人先去上班了，下次見～','訂單：我自己走就好'],
+  peek:['連老樣子都不記得喔…','我都來十年了欸！','唉，年輕人喔…'],
 };
+const OOPS_EMOJI = {wrong:'🥲', burnt:'🔥', spill:'🌊', leave:'💤'};
 const FAIL = {
   burnt:['客人在 Google 留了一顆星：「蛋餅有炭烤風味，很特別。」','消防隊來了，順便點了三份蛋餅。','煙太大，隔壁以為你在烤肉，拿肉來加入。'],
   wrong:['你媽打電話來：「還是回來考公務員好了。」','客人說：「老闆，你是不是第一天上班？」答：是。','今天的營業額是一張「謝謝老闆請客」的卡片。'],
@@ -470,24 +487,23 @@ let S;
 function freshState(){
   return {
     running:false, paused:false, over:false,
-    gt:0, spawnT:1.2, spawned:0, cid:0,
+    gt:0, spawnT:.8, spawned:0, cid:0,
     queue:[], slots:[null,null,null,null], selected:null, born:0,
     cups:Object.keys(DRINKS).map(type=>({type, level:0, pouring:false, pid:null})),
     lives:LIVES, served:0, money:0, freeCount:0, peeks:0, mistakes:0, lastFail:'wrong',
-    events:{uncle1:false, uncle2:false, uncle3:false, deliv1:false, deliv2:false, rush:false},
+    pending:[], events:{uncle1:false, uncle2:false, uncle3:false, deliv1:false, deliv2:false, rush:false},
     lastFirst:null,
   };
 }
 
 /* ================= 客人 ================= */
 function newCustomer(o={}){
-  const gender = o.gender || (rand()<.5?'m':'f');
   const order = o.order || genOrder(S.gt);
-  const maxP = o.patience || (lerp(46, 28, S.gt/GAME_LEN) + order.length*7);
+  const maxP = o.patience || (lerp(32, 20, S.gt/GAME_LEN) + order.length*6);
   S.spawned++;
   return {
-    id:++S.cid, gender,
-    order, done:order.map(()=>false), p:maxP, maxP,
+    id:++S.cid, where: rand()<.5 ? '內用' : '外帶',
+    order, done:order.map(()=>false), p:maxP, maxP, earned:0,
     type:o.type||'normal', hidden:!!o.hidden, free:false, greeted:false, changeAt:null,
   };
 }
@@ -497,34 +513,29 @@ function onFirstChanged(){
   const c = S.queue[0];
   if (!c || c.greeted) return;
   c.greeted = true;
-  let line;
-  if (c.type === 'delivery') line = '外送小哥早！單子給我！';
-  else line = (c.gender==='m' ? '帥哥' : '美女') + '早安！要吃什麼？';
-  bossSay(line); sfx.chime();
+  sfx.chime();
   const tk = $('#ticket'); tk.classList.remove('pop'); void tk.offsetWidth; tk.classList.add('pop');
-  if (c.type === 'uncle' && c.hidden) setTimeout(()=>custSay('老樣子！'), 900);
-  else if (c.type === 'uncle') setTimeout(()=>custSay('我常客喔，記住我點什麼！'), 900);
+  if (c.type === 'uncle' && !c.hidden) setTimeout(()=>custSay('常客阿伯：記住我點什麼喔！'), 600);
   else if (S.gt > 80 && c.order.some((o,i)=>!c.done[i] && o.type==='egg_pancake' && o.tops.length < 3) && rand() < .22)
     c.changeAt = S.gt + rnd(3, 7);
 }
 
 function customerLeaves(c){
   S.queue.splice(S.queue.indexOf(c), 1);
-  custSay(pickAny(LINES.leave));
-  mistake('leave', `${whoOf(c)}等太久走掉了`);
+  S.spawnT = 1;
+  mistake('leave', pickAny(LINES.leave), '超時了，這單沒了');
   renderFront();
 }
 
 function completeOrder(c){
-  const sum = c.order.reduce((a,o)=>a+o.price, 0);
-  const tip = c.p/c.maxP > .6 ? 10 : 0;
-  const earn = c.free ? 0 : sum + tip;
-  S.money += earn; S.served++;
+  const tip = !c.free && c.p/c.maxP > .5 ? 10 : 0;
+  S.money += tip; S.served++;
   if (c.free) S.freeCount++;
   S.queue.shift();
+  S.spawnT = .6;
   sfx.cash();
-  floater(c.free ? '免費…' : `+$${earn}`, c.free);
-  bossSay(pickAny(LINES.thanks));
+  if (tip) setTimeout(()=>floater('出餐快，小費 +$10'), 250);
+  bossSay(c.free ? '這單請客了…' : '出餐完成！');
   renderHUD(); renderFront();
   if (S.served >= GOAL) endGame(true);
 }
@@ -532,10 +543,11 @@ function completeOrder(c){
 /* 交餐：只能交給第一位客人 */
 function deliver(item){
   const c = S.queue[0];
-  if (!c){ toast('還沒有客人啦～'); return false; }
+  if (!c){ toast('還沒有訂單喔～'); return false; }
   const idx = c.order.findIndex((o,i)=>!c.done[i] && o.key === item.key);
   if (idx >= 0){
     c.done[idx] = true; sfx.ding();
+    if (!c.free){ const earn = c.order[idx].price; c.earned += earn; S.money += earn; floater(`+$${earn}`); renderHUD(); }
     if (c.done.every(Boolean)) completeOrder(c); else renderTicket();
     return true;
   }
@@ -543,22 +555,33 @@ function deliver(item){
   let line;
   if (item.kind === 'drink' && sameType) line = pickAny(LINES.wrongDrink);
   else line = pickAny(sameType ? LINES.wrongDetail : LINES.wrongItem);
+  let sub = '沒關係～這單就請客吧';
+  if (!c.free && c.earned){ S.money -= c.earned; sub = `這單改請客（-$${c.earned}）`; c.earned = 0; }
   c.free = true;
-  custSay(line);
   const tk = $('#ticket'); tk.classList.remove('mad'); void tk.offsetWidth; tk.classList.add('mad');
-  mistake('wrong');
+  mistake('wrong', line, sub);
   renderTicket();
   return true;
 }
 
 /* ================= 失誤 ================= */
-function mistake(kind, msg){
+let oopsT;
+function oops(kind, line, sub){
+  const o = $('#oops');
+  o.querySelector('.oe').textContent = OOPS_EMOJI[kind] || '🥲';
+  o.querySelector('.ol').textContent = line;
+  o.querySelector('.os').textContent = sub || '';
+  o.classList.remove('show','hide'); void o.offsetWidth; o.classList.add('show');
+  clearTimeout(oopsT);
+  oopsT = setTimeout(()=>{ o.classList.remove('show'); o.classList.add('hide'); }, 1700);
+}
+function mistake(kind, line, sub){
   if (S.over) return;
   S.lives--; S.mistakes++; S.lastFail = kind;
   sfx.buzz();
   if (navigator.vibrate) try { navigator.vibrate([80,40,80]); } catch(e){}
   const f = $('#flash'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on');
-  if (msg) toast(msg);
+  oops(kind, line, (sub ? sub + '　' : '') + `🍳 剩 ${Math.max(0,S.lives)} 次`);
   renderHUD();
   if (S.lives <= 0) setTimeout(()=>endGame(false), 700);
 }
@@ -626,24 +649,27 @@ function update(dt){
 
   // 特殊事件
   const E = S.events;
-  if (!E.uncle1 && S.spawned >= 2 && t > 12){ E.uncle1 = true; spawn(newCustomer({type:'uncle', gender:'m', order:UNCLE_ORDER(), patience:60})); }
-  if (!E.uncle2 && t > 125){ E.uncle2 = true; spawn(newCustomer({type:'uncle', gender:'m', order:UNCLE_ORDER(), patience:55, hidden:true})); }
-  if (!E.uncle3 && t > 235){ E.uncle3 = true; spawn(newCustomer({type:'uncle', gender:'m', order:UNCLE_ORDER(), patience:50, hidden:true})); }
-  if (!E.deliv1 && t > 150){ E.deliv1 = true; spawn(newCustomer({type:'delivery', gender:'m', order:genOrder(t,4), patience:75})); toast('外送單來了！4 樣！'); }
-  if (!E.deliv2 && t > 250){ E.deliv2 = true; spawn(newCustomer({type:'delivery', gender:'m', order:genOrder(t,4), patience:70})); toast('又一張外送單！'); }
-  if (!E.rush && t > 200){ E.rush = true; toast('上班上課尖峰來了！'); }
+  const P = S.pending;
+  if (!E.uncle1 && S.spawned >= 2){ E.uncle1 = true; P.push(newCustomer({type:'uncle', order:UNCLE_ORDER(), patience:45})); }
+  if (!E.uncle2 && t > 125){ E.uncle2 = true; P.push(newCustomer({type:'uncle', order:UNCLE_ORDER(), patience:42, hidden:true})); }
+  if (!E.uncle3 && t > 235){ E.uncle3 = true; P.push(newCustomer({type:'uncle', order:UNCLE_ORDER(), patience:38, hidden:true})); }
+  if (!E.deliv1 && t > 150){ E.deliv1 = true; P.push(newCustomer({type:'delivery', order:genOrder(t,4), patience:48})); }
+  if (!E.deliv2 && t > 250){ E.deliv2 = true; P.push(newCustomer({type:'delivery', order:genOrder(t,4), patience:44})); }
+  if (!E.rush && t > 200){ E.rush = true; toast('上班上課尖峰！訂單變大了'); }
 
-  // 來客
-  S.spawnT -= dt;
-  if (S.queue.length === 0) S.spawnT = Math.min(S.spawnT, .8);
-  if (S.spawnT <= 0){
-    if (S.queue.length < 4) spawn(newCustomer());
-    S.spawnT = lerp(9, 3.6, t/260) * rnd(.8, 1.2);
+  // 來單：一次一張，完成才出下一張
+  if (!S.queue.length){
+    S.spawnT -= dt;
+    if (S.spawnT <= 0){
+      const c = P.shift() || newCustomer();
+      if (c.type === 'delivery') toast('外送單！一次 4 樣！');
+      spawn(c);
+    }
   }
 
-  // 耐心
+  // 訂單倒數
   for (const c of S.queue.slice()){
-    c.p -= dt * (c === S.queue[0] ? 1 : .75);
+    c.p -= dt;
     if (c.p <= 0){ customerLeaves(c); if (S.over) return; }
   }
   // 改單
@@ -673,8 +699,7 @@ function update(dt){
     if (s.state === 'cook' && s.t >= cook){ s.state = 'ready'; sfx.ready(); }
     if (s.state === 'ready' && s.t >= cook + win){
       s.state = 'burnt'; s.clearIn = 1.6;
-      custSay(pickAny(LINES.burnt));
-      mistake('burnt', `${GRILL[s.type].name}燒焦了！`);
+      mistake('burnt', pickAny(LINES.burnt), `${GRILL[s.type].name}煎過頭了`);
     }
     if (s.state === 'burnt'){ s.clearIn -= dt; if (s.clearIn <= 0){ clearSlot(i); return; } }
     else cooking++;
@@ -692,8 +717,7 @@ function update(dt){
     if (c.level >= 100){
       c.level = 0; c.pouring = false; c.pid = null;
       const el = cupEls[i].cup; el.classList.remove('spill'); void el.offsetWidth; el.classList.add('spill');
-      custSay(pickAny(LINES.spill));
-      mistake('spill', `${DRINKS[c.type].name}滿出來了！`);
+      mistake('spill', pickAny(LINES.spill), `${DRINKS[c.type].name}倒太滿了`);
     }
     renderCup(i);
   });
@@ -776,37 +800,31 @@ function renderCup(i){
 }
 
 function itemMini(o){ return `<span class="mini">${foodSVG(o.type, o.tops)}</span>`; }
-function whoOf(c){ return c.type==='delivery' ? '外送小哥' : c.type==='uncle' ? '常客阿伯' : (c.gender==='m'?'帥哥':'美女'); }
-function renderFront(){
-  renderTicket();
-  const rest = S.queue.slice(1, 4);
-  let html = rest.map(q=>`<div class="qc"><div class="bub">${q.hidden ? '<b>老樣子</b>' : q.order.map(itemMini).join('')}</div><div class="pbar"><i></i></div></div>`).join('');
-  for (let k=rest.length;k<3;k++) html += '<div class="qc ghost"></div>';
-  $('#queue').innerHTML = html;
-  paintPatience();
-}
+function whoOf(c){ return c.type==='delivery' ? '外送單' : c.type==='uncle' ? '常客阿伯' : c.where; }
+function renderFront(){ renderTicket(); }
 function renderTicket(){
   const c = S.queue[0], tk = $('#ticket');
   if (!c){ tk.innerHTML = '<div class="waiting">等客人中…</div>'; return; }
-  const head = `<div class="tk-head"><span class="who">${whoOf(c)}</span><div class="pbar"><i></i></div><span class="cnt">${c.hidden ? '' : c.done.filter(Boolean).length+'/'+c.order.length}</span></div>`;
+  const head = `<div class="tk-head"><span>#${String(c.id).padStart(3,'0')}</span><span class="who">${whoOf(c)}</span><div class="pbar"><i></i></div><span class="sum">${c.hidden ? '' : '$'+c.order.reduce((a,o)=>a+o.price,0)}</span></div>`;
   if (c.hidden){
-    tk.innerHTML = head + `<div class="secret" data-act="peek"><b>「老樣子！」</b><small>想不起來？點這裡偷看（阿伯會不爽）</small></div>`;
+    tk.innerHTML = head + `<div class="secret" data-act="peek"><b>「老樣子！」</b><small>想不起來？點這裡偷看（會扣時間）</small></div>`;
   } else {
-    tk.innerHTML = head + `<div class="tk-items">${c.order.map((o,i)=>`<div class="tk-item ${c.done[i]?'done':''} ${o.changed?'changed':''}">${itemMini(o)}<span>${o.label}${o.sub?`<small>${o.sub}</small>`:''}</span></div>`).join('')}</div>${c.free ? '<div class="free">免費</div>' : ''}`;
+    tk.innerHTML = head + `<div class="tk-items">${c.order.map((o,i)=>`<div class="tk-item ${c.done[i]?'done':''} ${o.changed?'changed':''}">${itemMini(o)}<span>${o.label}<span class="pr">$${o.price}</span>${o.sub?`<small>${o.sub}</small>`:''}</span></div>`).join('')}</div>${c.free ? '<div class="free">免費</div>' : ''}`;
   }
   paintPatience();
 }
 function paintPatience(){
-  const bars = [document.querySelector('#ticket .pbar i'), ...document.querySelectorAll('#queue .qc:not(.ghost) .pbar i')];
-  S.queue.slice(0,4).forEach((c,k)=>{
-    const b = bars[k]; if (!b) return;
+  const c = S.queue[0], b = document.querySelector('#ticket .pbar i');
+  if (c && b){
     const r = clamp01(c.p / c.maxP);
     b.style.transform = `scaleX(${r})`;
     b.style.background = r > .5 ? 'var(--scallion)' : r > .25 ? 'var(--yolk)' : 'var(--tomato)';
-  });
+  }
 }
 function renderHUD(){
   $('#served').textContent = `${S.served}/${GOAL}`;
+  const m = $('#money'), txt = '$' + S.money.toLocaleString();
+  if (m.textContent !== txt){ m.textContent = txt; m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump'); }
   let h = '';
   for (let i=0;i<LIVES;i++) h += `<span class="${i < S.lives ? '' : 'gone'}">🍳</span>`;
   $('#lives').innerHTML = h;
@@ -820,12 +838,12 @@ function renderTimer(){
 /* ---------- 提示泡泡 ---------- */
 let toastT, bossT, custT;
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 1300); }
-function bossSay(msg){ const b = $('#bossSay'); b.textContent = '老闆：' + msg; b.classList.add('show'); clearTimeout(bossT); bossT = setTimeout(()=>b.classList.remove('show'), 1800); }
+function bossSay(msg){ const b = $('#bossSay'); b.textContent = msg; b.classList.add('show'); clearTimeout(bossT); bossT = setTimeout(()=>b.classList.remove('show'), 1800); }
 function custSay(msg){ const b = $('#custSay'); b.textContent = msg; b.classList.add('show'); clearTimeout(custT); custT = setTimeout(()=>b.classList.remove('show'), 2200); }
 function floater(text, sad){
   const f = document.createElement('div'); f.className = 'floater'; f.textContent = text;
   if (sad) f.style.color = 'var(--tomato)';
-  f.style.left = '45%'; f.style.top = '70px';
+  f.style.right = '24px'; f.style.top = '60px';
   $('#app').appendChild(f); setTimeout(()=>f.remove(), 1000);
 }
 function shakeEl(el){ if (!el) return; el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
@@ -869,13 +887,13 @@ function hideCard(){ $('#overlay').hidden = true; }
 function startScreen(){
   showCard(`
     <h1>帥哥美女早餐店</h1>
-    <p class="big">你是早餐店老闆。<br>五分鐘出完 <b>20 張單</b>！</p>
+    <p class="big">你是早餐店老闆。<br>五分鐘出完 <b>20 張單</b>！<br>每樣菜都有價錢，看你今天賺多少。</p>
     <ul>
       <li>點<b>蛋餅、蘿蔔糕…</b>放上煎台，再點<b>肉鬆、起司…</b>加料</li>
       <li>綠圈亮了點一下出餐，<b>拖太久會焦</b></li>
       <li><b>按住杯子</b>倒飲料，停在中杯或大杯的線之間，按「送」</li>
-      <li>只看得到第一位客人的明細，後面的只知道大概要什麼</li>
-      <li>做錯（料不對、燒焦、溢出、客人跑掉）<b>3 次就倒店</b></li>
+      <li>一次一張單，做完才會來下一張，超時就飛走了</li>
+      <li>做錯（料不對、燒焦、溢出、超時）<b>3 次就倒店</b>，送錯那單就變請客</li>
     </ul>
     <button class="cta" id="startBtn">開店！</button>
     <p style="font-size:12px;color:var(--ink-soft)">一開始可以慢慢用一隻手指玩，後面會忙到要兩隻手。</p>`);
