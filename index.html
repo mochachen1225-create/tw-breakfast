@@ -124,6 +124,14 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .slot .tops b{font-size:12px;background:var(--paper);color:var(--ink);border-radius:4px;padding:0 3px;white-space:nowrap}
 .slot .hint{position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:900;color:#fff;background:var(--scallion);border-radius:4px;padding:0 4px;white-space:nowrap}
 
+.tray{display:flex;align-items:center;gap:5px;min-height:30px;background:#F3E4CF;border-radius:10px;padding:3px 6px;box-shadow:inset 0 0 0 2px #E2C08D;overflow-x:auto}
+.tray .tl{font-family:var(--display);font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.tray .te{font-size:11.5px;color:var(--ink-soft);white-space:nowrap}
+.tray button{display:flex;align-items:center;gap:2px;background:var(--paper);border-radius:999px;padding:1px 8px 1px 2px;font-weight:900;font-size:12px;white-space:nowrap;box-shadow:0 2px 0 #D8C3A5;flex:0 0 auto}
+.tray button svg{width:22px;height:22px}
+.tray button b{color:var(--tomato)}
+.tray button.pop{animation:hop .3s ease-out}
+.slot .qty{position:absolute;left:4%;top:4%;transform:none;padding:0 6px;min-width:28px;height:28px;border-radius:999px;background:var(--yolk);color:var(--ink);font-family:var(--display);font-size:15px;display:grid;place-items:center;box-shadow:0 2px 0 rgba(0,0,0,.3)}
 .boards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .board{position:relative;height:62px;border-radius:10px;background:var(--wood);box-shadow:inset 0 0 0 2px var(--wood-dk),0 3px 0 var(--wood-dk);
   display:flex;align-items:center;gap:4px;padding:4px 6px;box-sizing:border-box;min-width:0;
@@ -233,7 +241,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 @keyframes wobble{0%{transform:rotate(-5deg) translateY(0)}100%{transform:rotate(5deg) translateY(-4px)}}
 @keyframes roll{0%{transform:rotate(0)}100%{transform:rotate(720deg)}}
 @media (max-width:385px){.sign{font-size:12px;letter-spacing:0}.pill{padding:2px 6px}.stats{gap:4px;font-size:13px}.iconbtn{width:26px;height:26px}.ing{font-size:11px}}
-@media (max-height:700px){.grill{min-height:110px}.kitchen{gap:5px}.ing{min-height:36px}.ing svg{width:18px;height:18px}.ing.c{min-height:28px}.board{height:52px}.board .bimg{width:38px;height:38px}.ticket{min-height:72px}}
+@media (max-height:700px){.grill{min-height:96px}.kitchen{gap:4px;padding-top:4px}.ing{min-height:34px}.ing svg{width:17px;height:17px}.ing.c{min-height:27px}.board{height:46px}.board .bimg{width:34px;height:34px}.board .bbtns button{height:19px}.ticket{min-height:66px}.tray{min-height:26px;padding:1px 6px}.cup{height:42px}.sugar{min-height:21px}.cupBtns button{min-height:25px}.front{padding-top:5px}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-iteration-count:1!important}}
 </style>
 </head>
@@ -263,6 +271,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 
   <section class="kitchen">
     <div class="grill" id="grill"></div>
+    <div class="tray" id="tray"></div>
     <div class="boards" id="boards"></div>
     <div class="ings" id="ings"></div>
     <div class="cups" id="cups"></div>
@@ -293,7 +302,7 @@ const clamp01 = t => Math.max(0,Math.min(1,t));
 const lerp = (a,b,t) => a+(b-a)*clamp01(t);
 
 /* ================= 菜單與食材 ================= */
-const GAME_LEN = 300, GOAL = 20, LIVES = 3, COST_RATE = .4;
+const MAX_BATCH = 3, GAME_LEN = 300, GOAL = 20, LIVES = 3, COST_RATE = .4;
 // 夾料：cooked = 要先上煎台；sauce = 鐵板麵醬
 const ING = {
   pork:    {name:'肉鬆',  price:10, color:'#B5743A'},
@@ -611,7 +620,7 @@ function freshState(){
   return {
     running:false, paused:false, over:false,
     gt:0, spawnT:.8, spawned:0, cid:0,
-    queue:[], pending:[], slots:[null,null], board:[null,null], sel:null, born:0,
+    queue:[], pending:[], slots:[null,null], board:[null,null], tray:{egg:0,bacon:0,chop:0,chicken:0}, sel:null, born:0,
     cups:Object.keys(DRINKS).map(type=>({type, level:0, sugar:'none', pouring:false, pid:null})),
     lives:LIVES, served:0, income:0, loss:0, freeCount:0, peeks:0, mistakes:0, lastFail:'wrong',
     sinceUber:0, events:{uncle1:false, uncle2:false, uncle3:false, rush:false},
@@ -735,10 +744,14 @@ function mistake(kind, line, sub){
 
 /* ================= 煎台 ================= */
 function placeGrill(type, el){
+  const cat = MAINS[type] ? 'main' : SIDES[type] ? 'side' : 'fill';
+  if (cat === 'fill'){
+    const j = S.slots.findIndex(s=>s && s.type === type && s.state === 'cook' && s.qty < MAX_BATCH);
+    if (j >= 0){ S.slots[j].qty++; sfx.plop(); renderSlot(j); return; }
+  }
   const i = S.slots.findIndex(s=>!s);
   if (i < 0){ toast('兩個鍋都在用！'); shakeEl($('#grill')); return; }
-  const cat = MAINS[type] ? 'main' : SIDES[type] ? 'side' : 'fill';
-  S.slots[i] = {type, cat, tops:[], t:0, state:'cook', born:++S.born, clearIn:0};
+  S.slots[i] = {type, cat, tops:[], t:0, state:'cook', born:++S.born, clearIn:0, qty:1};
   if (cat !== 'fill' && (type === 'egg_pancake' || type === 'noodle')) S.sel = {w:'g', i};
   sfx.plop(); renderSlot(i); renderSel();
 }
@@ -747,8 +760,11 @@ function tapSlot(i){
   const s = S.slots[i]; if (!s) return;
   if (s.state === 'burnt'){ clearSlot(i); return; }
   if (s.cat === 'fill'){
-    if (s.state !== 'ready'){ toast(`${ING[s.type].name}還沒熟`); return; }
-    if (addIng(s.type, null, i)) clearSlot(i);
+    if (s.state !== 'ready'){ toast(`${ING[s.type].name}還沒熟，再按一次同樣的料可以多煎一份`); return; }
+    let n = s.qty;
+    if (addIng(s.type, null, true)) n--;
+    if (n > 0){ S.tray[s.type] += n; renderTray(s.type); toast(`${ING[s.type].name} ×${n} 放到保溫台`); }
+    clearSlot(i);
     return;
   }
   if (s.state === 'ready'){ if (deliver(slotItem(s))) clearSlot(i); return; }
@@ -756,7 +772,7 @@ function tapSlot(i){
 }
 function tossSlot(i){
   const s = S.slots[i]; if (!s) return;
-  if (s.state !== 'burnt') lose(costOf(s.cat === 'fill' ? {price:ING[s.type].price} : slotItem(s)), '丟掉');
+  if (s.state !== 'burnt') lose(costOf(s.cat === 'fill' ? {price:ING[s.type].price*s.qty} : slotItem(s)), '丟掉');
   clearSlot(i);
 }
 function clearSlot(i){ S.slots[i] = null; if (S.sel && S.sel.w==='g' && S.sel.i===i) S.sel = null; renderSlot(i); renderSel(); }
@@ -791,7 +807,7 @@ function accepts(x, id){
   if (ING[id].sauce) return x.type === 'noodle';
   return !!MAINS[x.type] && MAINS[x.type].fill.includes(id);
 }
-function addIng(id, el){
+function addIng(id, el, quiet){
   let ref = S.sel, x = targetOf(ref);
   if (!x || !accepts(x, id)){
     ref = null; let bestBorn = -1;
@@ -802,10 +818,11 @@ function addIng(id, el){
   const N = ING[id].name;
   if (!x){
     const where = ING[id].sauce ? '鐵板麵' : Object.values(MAINS).filter(m=>m.fill.includes(id)).map(m=>m.name).join('、');
-    toast(`${N}可以加在：${where}`); shakeEl(el); return false;
+    if (!quiet){ toast(`${N}可以加在：${where}`); shakeEl(el); }
+    return false;
   }
   if (ING[id].sauce) x.tops = [id];
-  else { if (x.tops.includes(id)){ toast(`已經加過${N}了`); return false; } x.tops.push(id); }
+  else { if (x.tops.includes(id)){ if (!quiet) toast(`已經加過${N}了`); return false; } x.tops.push(id); }
   S.sel = ref; sfx.tick();
   if (ref.w === 'g') renderSlot(ref.i); else renderBoard(ref.i);
   renderSel();
@@ -887,7 +904,7 @@ function update(dt){
     if (s.state === 'cook' && s.t >= cook){ s.state = 'ready'; sfx.ready(); renderSlot(i); }
     if (s.state === 'ready' && s.t >= cook + win){
       s.state = 'burnt'; s.clearIn = 1.6;
-      lose(costOf(s.cat === 'fill' ? {price:ING[s.type].price} : slotItem(s)), '燒焦');
+      lose(costOf(s.cat === 'fill' ? {price:ING[s.type].price*s.qty} : slotItem(s)), '燒焦');
       mistake('burnt', pickAny(LINES.burnt), `${nameOf(s.type)}煎過頭了`);
       renderSlot(i);
     }
@@ -967,11 +984,12 @@ function renderSlot(i){
   E.el.classList.toggle('has', !!s);
   E.el.classList.remove('ready','warn');
   E.smoke.classList.remove('on');
-  const old = E.el.querySelector('.hint'); if (old) old.remove();
+  E.el.querySelectorAll('.hint').forEach(h=>h.remove());
   if (!s){ E.food.innerHTML = '<span class="empty">空</span>'; E.food.style.filter=''; E.ring.style.setProperty('--p',0); E.tops.innerHTML=''; return; }
   E.food.innerHTML = foodSVG(s.type, s.tops);
   E.tops.innerHTML = s.tops.map(t=>`<b>${ING[t].name}</b>`).join('');
-  if (s.cat === 'fill' && s.state === 'ready') E.el.insertAdjacentHTML('beforeend', '<span class="hint">點我夾去配</span>');
+  if (s.cat === 'fill' && s.state === 'ready') E.el.insertAdjacentHTML('beforeend', '<span class="hint">點我夾起來</span>');
+  if (s.cat === 'fill' && s.qty > 1) E.el.insertAdjacentHTML('beforeend', `<span class="hint qty">×${s.qty}</span>`);
 }
 function paintSlot(i, s, cook, win){
   const E = slotEls[i];
@@ -997,6 +1015,12 @@ function renderBoard(i){
   d.innerHTML = `<div class="bimg">${foodSVG(b.type)}</div>
     <div class="btags"><span class="bname">${MAINS[b.type].name}</span>${b.tops.length ? b.tops.map(t=>`<b>${ING[t].name}</b>`).join('') : '<b style="opacity:.6">還沒加料</b>'}</div>
     <div class="bbtns"><button class="send" data-act="bsend" data-v="${i}">送</button><button data-act="btoss" data-v="${i}" aria-label="丟掉">丟</button></div>`;
+}
+function renderTray(popId){
+  const ids = Object.keys(S.tray).filter(k=>S.tray[k] > 0);
+  $('#tray').innerHTML = '<span class="tl">保溫台</span>' + (ids.length
+    ? ids.map(k=>`<button data-act="tray" data-v="${k}" class="${k===popId?'pop':''}">${foodSVG(k)}${ING[k].name}<b>×${S.tray[k]}</b></button>`).join('')
+    : '<span class="te">煎好的配料沒地方放，會先收在這裡</span>');
 }
 function renderSel(){
   slotEls.forEach((E,i)=>E.el.classList.toggle('sel', !!(S.sel && S.sel.w==='g' && S.sel.i===i && S.slots[i])));
@@ -1082,6 +1106,7 @@ document.addEventListener('pointerdown', e => {
     case 'ing': addIng(v, el); break;
     case 'slot': tapSlot(+v); break;
     case 'toss': tossSlot(+v); break;
+    case 'tray': if (S.tray[v] > 0 && addIng(v, el)){ S.tray[v]--; renderTray(); } break;
     case 'board': if (S.board[+v]){ S.sel = {w:'b', i:+v}; renderSel(); sfx.tick(); } break;
     case 'bsend': sendBoard(+v); break;
     case 'btoss': tossBoard(+v); break;
@@ -1146,7 +1171,7 @@ function rulesScreen(){
       <li>訂單有<b>內用、外帶、🛵 Uber 取餐</b>；Uber 一次 5～7 樣，做完小費比較多</li>
       <li><b>蛋餅</b>：蛋餅皮放上煎台，再點料加上去，煎好點一下出餐</li>
       <li><b>三明治、漢堡、飯糰</b>：放到工作台，加料後按「送」</li>
-      <li>有 🔥 的料要先煎，熟了點一下就夾去配</li>
+      <li>有 🔥 的料要先煎，同一種多按幾次一鍋最多煎 3 份；熟了點一下夾去配，沒地方配就先放<b>保溫台</b></li>
       <li><b>按住杯子</b>倒飲料，停在中杯或大杯的線之間；點杯子下面的按鈕切換<b>無糖／半糖／全糖</b></li>
       <li>給多了（中杯做成大杯、多加料）只收原本的錢；<b>給少了就變免費</b></li>
       <li>送錯、燒焦、溢出、超時 <b>3 次就倒店</b></li>
@@ -1161,7 +1186,7 @@ function startGame(){
   S = freshState(); seed = (Date.now() ^ 0x5f3759df) >>> 0;
   S.running = true;
   sfx.bgmStart();
-  S.slots.forEach((_,i)=>renderSlot(i)); S.board.forEach((_,i)=>renderBoard(i)); S.cups.forEach((_,i)=>renderCup(i));
+  S.slots.forEach((_,i)=>renderSlot(i)); S.board.forEach((_,i)=>renderBoard(i)); S.cups.forEach((_,i)=>renderCup(i)); renderTray();
   renderSel(); renderHUD(); renderTicket(); renderTimer(); renderLedger();
   hideCard();
 }
@@ -1222,7 +1247,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) pause
 S = freshState();
 setShopName(shopName);
 buildKitchen();
-S.slots.forEach((_,i)=>renderSlot(i)); S.board.forEach((_,i)=>renderBoard(i)); S.cups.forEach((_,i)=>renderCup(i));
+S.slots.forEach((_,i)=>renderSlot(i)); S.board.forEach((_,i)=>renderBoard(i)); S.cups.forEach((_,i)=>renderCup(i)); renderTray();
 renderHUD(); renderTicket(); renderTimer(); renderLedger();
 startScreen();
 requestAnimationFrame(loop);
