@@ -99,11 +99,11 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 
 /* ---------- 廚房 ---------- */
 .kitchen{flex:1 1 auto;display:flex;flex-direction:column;gap:6px;padding:6px 0 max(8px,env(safe-area-inset-bottom,0px));min-height:0}
-.grill{flex:1 1 0;min-height:150px;background:linear-gradient(#4A505A,var(--steel));border-radius:14px;padding:8px;display:grid;
-  grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:8px;place-items:center;
+.grill{flex:1 1 0;min-height:130px;max-height:230px;container-type:size;background:linear-gradient(#4A505A,var(--steel));border-radius:14px;padding:8px;display:grid;
+  grid-template-columns:1fr 1fr;grid-template-rows:1fr;gap:14px;place-items:center;
   box-shadow:inset 0 0 0 2px #23272d,0 4px 0 #23272d;position:relative}
 .grill.hot{box-shadow:inset 0 0 0 2px #23272d,inset 0 0 22px rgba(246,120,40,.35),0 4px 0 #23272d}
-.slot{height:100%;max-height:100%;aspect-ratio:1;max-width:100%;min-height:0;position:relative;border-radius:50%;background:var(--steel-dk);display:grid;place-items:center;box-sizing:border-box}
+.slot{width:min(calc((100cqw - 30px)/2),calc(100cqh - 20px));height:auto;aspect-ratio:1;min-height:0;position:relative;border-radius:50%;background:var(--steel-dk);display:grid;place-items:center;box-sizing:border-box}
 .slot .ring{position:absolute;inset:-3px;border-radius:50%;
   background:conic-gradient(var(--rc,var(--yolk)) calc(var(--p,0)*1turn),transparent 0);
   -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));
@@ -113,16 +113,16 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .slot.sel{box-shadow:0 0 0 3px var(--paper),0 0 0 6px var(--yolk)}
 .slot.ready .food{animation:bob .5s infinite alternate}
 .slot.warn .ring{animation:blink .25s infinite alternate}
-.slot .empty{color:rgba(255,255,255,.2);font-size:13px;font-weight:700}
-.slot .toss{position:absolute;right:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:11px;font-weight:900;
+.slot .empty{color:rgba(255,255,255,.2);font-size:16px;font-weight:700}
+.slot .toss{position:absolute;right:4%;top:4%;width:30px;height:30px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:11px;font-weight:900;
   box-shadow:0 2px 0 rgba(0,0,0,.3);display:none;place-items:center}
 .slot.has .toss{display:grid}
 .slot .smoke{position:absolute;inset:0;pointer-events:none}
 .slot .smoke.on::before,.slot .smoke.on::after{content:"💨";position:absolute;left:30%;top:10%;font-size:26px;animation:rise 1.2s ease-out infinite}
 .slot .smoke.on::after{left:55%;animation-delay:.4s}
-.slot .tops{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:1px;width:120%}
-.slot .tops b{font-size:10px;background:var(--paper);color:var(--ink);border-radius:4px;padding:0 3px;white-space:nowrap}
-.slot .hint{position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:900;color:#fff;background:var(--scallion);border-radius:4px;padding:0 4px;white-space:nowrap}
+.slot .tops{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:2px;width:110%}
+.slot .tops b{font-size:12px;background:var(--paper);color:var(--ink);border-radius:4px;padding:0 3px;white-space:nowrap}
+.slot .hint{position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:12px;font-weight:900;color:#fff;background:var(--scallion);border-radius:4px;padding:0 4px;white-space:nowrap}
 
 .boards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .board{position:relative;height:62px;border-radius:10px;background:var(--wood);box-shadow:inset 0 0 0 2px var(--wood-dk),0 3px 0 var(--wood-dk);
@@ -306,25 +306,25 @@ const ING = {
   cucumber:{name:'小黃瓜',price:5,  color:'#3F8A35'},
   youtiao: {name:'油條',  price:10, color:'#D9963A'},
   radishd: {name:'菜脯',  price:5,  color:'#C9A04E'},
-  egg:     {name:'荷包蛋',price:10, color:'#F6B93B', cooked:true, cook:3.5},
-  bacon:   {name:'培根',  price:15, color:'#D9534F', cooked:true, cook:3},
-  chop:    {name:'豬排',  price:25, color:'#B8742F', cooked:true, cook:5},
-  chicken: {name:'卡拉雞',price:30, color:'#E08A2C', cooked:true, cook:5.5},
+  egg:     {name:'荷包蛋',price:10, color:'#F6B93B', cooked:true, cook:2.5},
+  bacon:   {name:'培根',  price:15, color:'#D9534F', cooked:true, cook:2.5},
+  chop:    {name:'豬排',  price:25, color:'#B8742F', cooked:true, cook:3.5},
+  chicken: {name:'卡拉雞',price:30, color:'#E08A2C', cooked:true, cook:4},
   pepper:  {name:'黑胡椒',price:0,  color:'#4A2E1A', sauce:true},
   mush:    {name:'蘑菇',  price:0,  color:'#B98B5E', sauce:true},
 };
 // 主食：都要配料，不能直接出。蛋餅在煎台做，其他在工作台組
 const MAINS = {
-  egg_pancake:{name:'蛋餅',  price:25, grill:true, cook:5, fill:['pork','cheese','corn','tuna','ham','bacon']},
+  egg_pancake:{name:'蛋餅',  price:25, grill:true, cook:4, fill:['pork','cheese','corn','tuna','ham','bacon']},
   toast:      {name:'三明治',price:20, fill:['ham','cheese','egg','lettuce','tomato','cucumber','bacon','tuna','chop']},
   burger:     {name:'漢堡',  price:30, fill:['chop','chicken','egg','cheese','lettuce','tomato','bacon']},
   riceball:   {name:'飯糰',  price:30, fill:['youtiao','radishd','pork','egg','cheese']},
 };
 const SIDES = {
-  radish:   {name:'蘿蔔糕',price:35, cook:6},
-  noodle:   {name:'鐵板麵',price:55, cook:5.5},
-  hotdog:   {name:'熱狗',  price:25, cook:4},
-  hashbrown:{name:'薯餅',  price:25, cook:4.5},
+  radish:   {name:'蘿蔔糕',price:35, cook:4.5},
+  noodle:   {name:'鐵板麵',price:55, cook:4.5},
+  hotdog:   {name:'熱狗',  price:25, cook:3.5},
+  hashbrown:{name:'薯餅',  price:25, cook:3.5},
 };
 const DRINKS = {
   milktea: {name:'奶茶',color:'#C9A27C'},
@@ -611,7 +611,7 @@ function freshState(){
   return {
     running:false, paused:false, over:false,
     gt:0, spawnT:.8, spawned:0, cid:0,
-    queue:[], pending:[], slots:[null,null,null,null,null,null], board:[null,null], sel:null, born:0,
+    queue:[], pending:[], slots:[null,null], board:[null,null], sel:null, born:0,
     cups:Object.keys(DRINKS).map(type=>({type, level:0, sugar:'none', pouring:false, pid:null})),
     lives:LIVES, served:0, income:0, loss:0, freeCount:0, peeks:0, mistakes:0, lastFail:'wrong',
     sinceUber:0, events:{uncle1:false, uncle2:false, uncle3:false, rush:false},
@@ -736,7 +736,7 @@ function mistake(kind, line, sub){
 /* ================= 煎台 ================= */
 function placeGrill(type, el){
   const i = S.slots.findIndex(s=>!s);
-  if (i < 0){ toast('煎台滿了！'); shakeEl($('#grill')); return; }
+  if (i < 0){ toast('兩個鍋都在用！'); shakeEl($('#grill')); return; }
   const cat = MAINS[type] ? 'main' : SIDES[type] ? 'side' : 'fill';
   S.slots[i] = {type, cat, tops:[], t:0, state:'cook', born:++S.born, clearIn:0};
   if (cat !== 'fill' && (type === 'egg_pancake' || type === 'noodle')) S.sel = {w:'g', i};
