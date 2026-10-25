@@ -1221,7 +1221,8 @@ function homeScreen(){
       <button class="modeBtn" data-mode="solo"><span class="mi">🍳</span><span><b>單人開店</b><small>自己一個人顧店，五分鐘出 20 單</small></span></button>
       <button class="modeBtn" data-mode="coop"><span class="mi">🤝</span><span><b>雙人合作</b><small>兩個人顧同一張單，誰出錯都扣全隊的</small></span></button>
       <button class="modeBtn" data-mode="vs"><span class="mi">🆚</span><span><b>雙人比賽</b><small>一樣的訂單，先倒店的人就輸</small></span></button>
-    </div>`);
+    </div>
+    <p style="font-size:11px;color:var(--ink-soft)">版本 11</p>`);
   document.querySelectorAll('.modeBtn').forEach(b=>b.onclick = () => { sfx.init(); sfx.tick(); NET.mode = b.dataset.mode; startScreen(); });
 }
 function startScreen(){
