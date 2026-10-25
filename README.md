@@ -8,7 +8,29 @@
 - **雙人合作**：兩人輸入同一組 4 位數房號，共用同一張點單、同一份 🍳 和帳本，誰出錯都扣全隊的
 - **雙人比賽**：兩人輸入同一組房號，訂單一模一樣；先倒店的人輸、先出完 20 單的人贏，時間到比出單數再比淨賺
 
-雙人模式用 claude.ai 網頁的即時房間功能（presence），只有在 claude.ai 上打開、而且朋友有權限打開這個網址時才連得上。
+雙人模式的連線方式：
+- 在 claude.ai 上打開：用 claude.ai 內建的即時房間（朋友要被邀請、有登入）
+- 放在 GitHub Pages / Netlify：改用 Firebase Realtime Database（`tw-breakfast` 專案，Spark 免費方案）
+
+Firebase 的安全規則（貼在 Realtime Database → Rules）：
+
+```json
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$room": {
+        ".read": "$room.matches(/^tw-(coop|vs)-[0-9]{4}$/)",
+        "$peer": {
+          ".write": "$room.matches(/^tw-(coop|vs)-[0-9]{4}$/) && $peer.matches(/^[a-z0-9]{6,16}$/)",
+          ".validate": "newData.isString() && newData.val().length < 6000"
+        }
+      }
+    }
+  }
+}
+```
 
 ## 規則
 
