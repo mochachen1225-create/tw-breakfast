@@ -131,6 +131,11 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 .tray button svg{width:22px;height:22px}
 .tray button b{color:var(--tomato)}
 .tray button.pop{animation:hop .3s ease-out}
+.tray button{position:relative;overflow:hidden}
+.tray button .warm{position:absolute;left:0;bottom:0;height:3px;background:var(--tomato);transform-origin:left}
+.tray button.cold{background:#E3F2FD;box-shadow:0 2px 0 #9CC7EA;animation:blink .4s infinite alternate}
+.tray button.cold .warm{background:#5DA9E9}
+.tray button.cold::after{content:"❄️";font-size:10px}
 .slot .qty{position:absolute;left:4%;top:4%;transform:none;padding:0 6px;min-width:28px;height:28px;border-radius:999px;background:var(--yolk);color:var(--ink);font-family:var(--display);font-size:15px;display:grid;place-items:center;box-shadow:0 2px 0 rgba(0,0,0,.3)}
 .boards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .board{position:relative;height:62px;border-radius:10px;background:var(--wood);box-shadow:inset 0 0 0 2px var(--wood-dk),0 3px 0 var(--wood-dk);
@@ -302,7 +307,7 @@ const clamp01 = t => Math.max(0,Math.min(1,t));
 const lerp = (a,b,t) => a+(b-a)*clamp01(t);
 
 /* ================= 菜單與食材 ================= */
-const MAX_BATCH = 3, GAME_LEN = 300, GOAL = 20, LIVES = 3, COST_RATE = .4;
+const TRAY_LIFE = 30, MAX_BATCH = 3, GAME_LEN = 300, GOAL = 20, LIVES = 3, COST_RATE = .4;
 // 夾料：cooked = 要先上煎台；sauce = 鐵板麵醬
 const ING = {
   pork:    {name:'肉鬆',  price:10, color:'#B5743A'},
@@ -620,7 +625,7 @@ function freshState(){
   return {
     running:false, paused:false, over:false,
     gt:0, spawnT:.8, spawned:0, cid:0,
-    queue:[], pending:[], slots:[null,null], board:[null,null], tray:{egg:0,bacon:0,chop:0,chicken:0}, sel:null, born:0,
+    queue:[], pending:[], slots:[null,null], board:[null,null], tray:{egg:[],bacon:[],chop:[],chicken:[]}, sel:null, born:0,
     cups:Object.keys(DRINKS).map(type=>({type, level:0, sugar:'none', pouring:false, pid:null})),
     lives:LIVES, served:0, income:0, loss:0, freeCount:0, peeks:0, mistakes:0, lastFail:'wrong',
     sinceUber:0, events:{uncle1:false, uncle2:false, uncle3:false, rush:false},
@@ -763,7 +768,7 @@ function tapSlot(i){
     if (s.state !== 'ready'){ toast(`${ING[s.type].name}還沒熟，再按一次同樣的料可以多煎一份`); return; }
     let n = s.qty;
     if (addIng(s.type, null, true)) n--;
-    if (n > 0){ S.tray[s.type] += n; renderTray(s.type); toast(`${ING[s.type].name} ×${n} 放到保溫台`); }
+    if (n > 0){ for (let k=0;k<n;k++) S.tray[s.type].push(S.gt); renderTray(s.type); toast(`${ING[s.type].name} ×${n} 放到保溫台（${TRAY_LIFE} 秒內要用）`); }
     clearSlot(i);
     return;
   }
@@ -930,6 +935,7 @@ function update(dt){
     renderCup(i);
   });
   sfx.pour(pouring);
+  updateTray();
   sfx.bgmTick(lerp(118, 158, t/GAME_LEN));
 
   paintPatience();
@@ -1017,10 +1023,32 @@ function renderBoard(i){
     <div class="bbtns"><button class="send" data-act="bsend" data-v="${i}">送</button><button data-act="btoss" data-v="${i}" aria-label="丟掉">丟</button></div>`;
 }
 function renderTray(popId){
-  const ids = Object.keys(S.tray).filter(k=>S.tray[k] > 0);
+  const ids = Object.keys(S.tray).filter(k=>S.tray[k].length > 0);
   $('#tray').innerHTML = '<span class="tl">保溫台</span>' + (ids.length
-    ? ids.map(k=>`<button data-act="tray" data-v="${k}" class="${k===popId?'pop':''}">${foodSVG(k)}${ING[k].name}<b>×${S.tray[k]}</b></button>`).join('')
-    : '<span class="te">煎好的配料沒地方放，會先收在這裡</span>');
+    ? ids.map(k=>`<button data-act="tray" data-v="${k}" class="${k===popId?'pop':''}">${foodSVG(k)}${ING[k].name}<b>×${S.tray[k].length}</b><i class="warm"></i></button>`).join('')
+    : `<span class="te">煎好的配料先收這裡，${TRAY_LIFE} 秒後會冷掉</span>`);
+  paintTray();
+}
+// 保溫台：每份配料只能放 30 秒，先放的先用、先冷掉
+function paintTray(){
+  document.querySelectorAll('#tray button').forEach(b=>{
+    const arr = S.tray[b.dataset.v]; if (!arr || !arr.length) return;
+    const left = clamp01(1 - (S.gt - arr[0]) / TRAY_LIFE);
+    b.querySelector('.warm').style.width = (left*100) + '%';
+    b.classList.toggle('cold', left < .25);
+  });
+}
+function updateTray(){
+  let changed = false;
+  for (const k in S.tray){
+    const arr = S.tray[k];
+    while (arr.length && S.gt - arr[0] >= TRAY_LIFE){
+      arr.shift(); changed = true;
+      lose(costOf({price:ING[k].price}), '冷掉');
+      toast(`${ING[k].name}冷掉了，不能用了 🥶`);
+    }
+  }
+  if (changed) renderTray(); else paintTray();
 }
 function renderSel(){
   slotEls.forEach((E,i)=>E.el.classList.toggle('sel', !!(S.sel && S.sel.w==='g' && S.sel.i===i && S.slots[i])));
@@ -1106,7 +1134,7 @@ document.addEventListener('pointerdown', e => {
     case 'ing': addIng(v, el); break;
     case 'slot': tapSlot(+v); break;
     case 'toss': tossSlot(+v); break;
-    case 'tray': if (S.tray[v] > 0 && addIng(v, el)){ S.tray[v]--; renderTray(); } break;
+    case 'tray': if (S.tray[v].length && addIng(v, el)){ S.tray[v].shift(); renderTray(); } break;
     case 'board': if (S.board[+v]){ S.sel = {w:'b', i:+v}; renderSel(); sfx.tick(); } break;
     case 'bsend': sendBoard(+v); break;
     case 'btoss': tossBoard(+v); break;
@@ -1171,7 +1199,7 @@ function rulesScreen(){
       <li>訂單有<b>內用、外帶、🛵 Uber 取餐</b>；Uber 一次 5～7 樣，做完小費比較多</li>
       <li><b>蛋餅</b>：蛋餅皮放上煎台，再點料加上去，煎好點一下出餐</li>
       <li><b>三明治、漢堡、飯糰</b>：放到工作台，加料後按「送」</li>
-      <li>有 🔥 的料要先煎，同一種多按幾次一鍋最多煎 3 份；熟了點一下夾去配，沒地方配就先放<b>保溫台</b></li>
+      <li>有 🔥 的料要先煎，同一種多按幾次一鍋最多煎 3 份；熟了點一下夾去配，沒地方配就先放<b>保溫台</b>，30 秒內沒用就冷掉</li>
       <li><b>按住杯子</b>倒飲料，停在中杯或大杯的線之間；點杯子下面的按鈕切換<b>無糖／半糖／全糖</b></li>
       <li>給多了（中杯做成大杯、多加料）只收原本的錢；<b>給少了就變免費</b></li>
       <li>送錯、燒焦、溢出、超時 <b>3 次就倒店</b></li>
