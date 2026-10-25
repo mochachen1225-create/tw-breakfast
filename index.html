@@ -269,6 +269,12 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 @keyframes floatUp{to{transform:translateY(-40px);opacity:0}}
 @keyframes flashBg{50%{background:var(--yolk)}}
 @keyframes wobble{0%{transform:rotate(-5deg) translateY(0)}100%{transform:rotate(5deg) translateY(-4px)}}
+#app.final::after{content:"";position:absolute;inset:0;margin:0 -10px;pointer-events:none;z-index:18;box-shadow:inset 0 0 0 5px rgba(228,87,46,.85),inset 0 0 40px 12px rgba(228,87,46,.45);animation:edge .5s ease-in-out infinite alternate}
+#app.final10::after{box-shadow:inset 0 0 0 8px rgba(228,87,46,.95),inset 0 0 70px 22px rgba(228,87,46,.6);animation-duration:.22s}
+#bigCount{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);font-family:var(--display);font-size:150px;line-height:1;color:var(--tomato);opacity:.3;pointer-events:none;z-index:17;text-shadow:0 6px 0 rgba(0,0,0,.15)}
+#bigCount.beat{animation:countBeat .9s ease-out}
+@keyframes edge{from{opacity:.35}to{opacity:1}}
+@keyframes countBeat{0%{transform:translate(-50%,-50%) scale(1.5);opacity:.6}100%{transform:translate(-50%,-50%) scale(1);opacity:.3}}
 @keyframes roll{0%{transform:rotate(0)}100%{transform:rotate(720deg)}}
 @media (max-width:385px){.sign{font-size:12px;letter-spacing:0}.pill{padding:2px 6px}.stats{gap:4px;font-size:13px}.iconbtn{width:26px;height:26px}.ing{font-size:11px}}
 @media (max-height:700px){.grill{min-height:96px}.kitchen{gap:4px;padding-top:4px}.ing{min-height:34px}.ing svg{width:17px;height:17px}.ing.c{min-height:27px}.board{height:46px}.board .bimg{width:34px;height:34px}.board .bbtns button{height:19px}.ticket{min-height:66px}.tray{min-height:26px;padding:1px 6px}.cup{height:42px}.sugar{min-height:21px}.cupBtns button{min-height:25px}.front{padding-top:5px}}
@@ -310,6 +316,7 @@ button:focus-visible{outline:3px solid var(--yolk);outline-offset:2px}
 
   <div id="toast"></div>
   <div id="flash"></div>
+  <div id="bigCount" hidden></div>
   <div id="oops"><div class="oc"><div class="oe"></div><div class="ol"></div><div class="os"></div></div></div>
 
   <div class="overlay" id="overlay">
@@ -592,6 +599,16 @@ const sfx = (() => {
     pourG = ac.createGain(); pourG.gain.value = 0;
     s2.connect(lp).connect(pourG).connect(master); s2.start();
   }
+  function siren(delay, dur, lvl){
+    if (!ac) return;
+    const t0 = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(520, t0);
+    o.frequency.linearRampToValueAtTime(lvl >= 3 ? 1100 : 880, t0 + dur/2);
+    o.frequency.linearRampToValueAtTime(520, t0 + dur);
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(lvl >= 3 ? .05 : .03, t0 + .05); g.gain.linearRampToValueAtTime(0, t0 + dur);
+    o.connect(g).connect(master); o.start(t0); o.stop(t0 + dur + .02);
+  }
   function tone(f, dur, type='sine', vol=.18, delay=0, slide){
     if (!ac) return;
     const t0 = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
@@ -617,21 +634,29 @@ const sfx = (() => {
     chime(){ tone(1046,.14,'triangle',.2); tone(1318,.14,'triangle',.2,.11); tone(1568,.3,'triangle',.22,.22); },
     bgmStart(){ if (!ac) return; bgm.on = true; bgm.step = 0; bgm.next = ac.currentTime + .1; },
     bgmStop(){ bgm.on = false; },
-    bgmTick(bpm){
+    // lvl：0 平常、1 最後一分鐘、2 最後 30 秒、3 最後 10 秒
+    bgmTick(bpm, lvl=0){
       if (!ac || !bgm.on) return;
       const step = 60 / bpm / 2;
       while (bgm.next < ac.currentTime + .15){
         const i = bgm.step % 32, when = bgm.next - ac.currentTime;
+        const tr = lvl >= 2 ? 5 : lvl >= 1 ? 2 : 0;          // 越後面 key 越高
         const m = MELODY[i];
-        if (m) tone(midi(m), step*.9, 'square', .035, when);
-        if (i % 4 === 0){
-          const root = BASS[Math.floor(i/8)];
-          tone(midi(i % 8 === 0 ? root : root + 7), step*1.6, 'triangle', .1, when);
+        if (m){
+          tone(midi(m + tr), step*.85, 'square', lvl ? .045 : .035, when);
+          if (lvl) tone(midi(m + tr + 12), step*.5, 'square', .016, when);
         }
-        if (i % 2 === 1) tone(5000, .02, 'square', .012, when);   // 鍋鏟敲擊感
+        const root = BASS[Math.floor(i/8)] + tr;
+        tone(midi(i % 2 === 0 ? root : root + 12), step*.9, 'triangle', .085, when);   // 一直跑的低音
+        if (i % 4 === 0) tone(150, .14, 'sine', lvl ? .5 : .3, when, 45);              // 大鼓
+        if (lvl >= 2 && i % 4 === 2) tone(150, .12, 'sine', .35, when, 45);            // 加倍大鼓
+        if (i % 8 === 4) tone(220, .08, 'square', lvl ? .07 : .045, when, 120);         // 小鼓
+        tone(lvl ? 7500 : 5000, .02, 'square', lvl ? .02 : .012, when);                // 鍋鏟敲擊感
+        if (lvl >= 1 && i % 16 === 0) siren(when, step*8, lvl);
         bgm.next += step; bgm.step++;
       }
     },
+    clock(hot){ tone(hot ? 1760 : 1250, hot ? .09 : .05, 'square', hot ? .09 : .05); if (hot) tone(880, .12, 'square', .05, .1); },
   };
 })();
 
@@ -982,7 +1007,11 @@ function update(dt){
   });
   sfx.pour(pouring);
   updateTray();
-  sfx.bgmTick(lerp(118, 158, t/GAME_LEN));
+  const left = GAME_LEN - t;
+  const lvl = left <= 10 ? 3 : left <= 30 ? 2 : left <= 60 ? 1 : 0;
+  const bpm = lvl ? lerp(172, 220, (60 - left) / 60) : lerp(138, 165, t / (GAME_LEN - 60));
+  sfx.bgmTick(bpm, lvl);
+  finalMinute(left, lvl);
 
   paintPatience();
   renderTimer();
@@ -1222,7 +1251,7 @@ function homeScreen(){
       <button class="modeBtn" data-mode="coop"><span class="mi">🤝</span><span><b>雙人合作</b><small>兩個人顧同一張單，誰出錯都扣全隊的</small></span></button>
       <button class="modeBtn" data-mode="vs"><span class="mi">🆚</span><span><b>雙人比賽</b><small>一樣的訂單，先倒店的人就輸</small></span></button>
     </div>
-    <p style="font-size:11px;color:var(--ink-soft)">版本 11</p>`);
+    <p style="font-size:11px;color:var(--ink-soft)">版本 12</p>`);
   document.querySelectorAll('.modeBtn').forEach(b=>b.onclick = () => { sfx.init(); sfx.tick(); NET.mode = b.dataset.mode; startScreen(); });
 }
 function startScreen(){
@@ -1282,6 +1311,7 @@ function startGame(opt={}){
   S.mode = opt.mode || 'solo'; S.role = opt.role || null;
   S.baseSeed = opt.seed || ((Math.random()*4294967296) >>> 0);
   S.running = true;
+  finalReset();
   $('#pauseBtn').hidden = S.mode !== 'solo';
   $('#rival').hidden = S.mode === 'solo';
   if (S.mode !== 'solo') renderRival();
@@ -1294,7 +1324,7 @@ function pause(on){
   if (!S || !S.running || S.over || S.mode !== 'solo') return;
   S.paused = on;
   sfx.sizzle(0); sfx.pour(false);
-  if (on) sfx.bgmStop(); else sfx.bgmStart();
+  if (on){ sfx.bgmStop(); $('#bigCount').hidden = true; } else sfx.bgmStart();
   S.cups.forEach((c,i)=>{ c.pouring = false; renderCup(i); });
   if (on){
     showCard(`<h2>休息一下</h2><p>煎台先關火，訂單也會等你。</p><button class="cta" id="resumeBtn">繼續營業</button><button class="ghostbtn" id="quitBtn">不開了，重新來</button>`);
@@ -1314,7 +1344,24 @@ function getTitle(){
   if (m === 2) return ['九命怪貓店長','差點倒店，但店裡的貓保佑你活下來了。'];
   return ['帥哥美女早安認證店長','你的「早安」比你的蛋餅還有名。'];
 }
-function stopAll(){ S.over = true; S.running = false; sfx.sizzle(0); sfx.pour(false); sfx.bgmStop(); }
+function stopAll(){ S.over = true; S.running = false; sfx.sizzle(0); sfx.pour(false); sfx.bgmStop(); finalReset(); }
+// 最後一分鐘：每秒滴答、紅框閃、最後 10 秒大倒數
+let lastSec = null;
+function finalMinute(left, lvl){
+  const app = $('#app');
+  app.classList.toggle('final', lvl >= 1);
+  app.classList.toggle('final10', lvl >= 3);
+  const sec = Math.ceil(left);
+  if (lvl && sec !== lastSec && sec > 0){
+    if (lastSec === null || lastSec > 60) toast('🔥 最後一分鐘！！');
+    if (sec === 30) toast('只剩 30 秒！！');
+    sfx.clock(sec <= 10);
+    const bc = $('#bigCount');
+    if (sec <= 10){ bc.hidden = false; bc.textContent = sec; bc.classList.remove('beat'); void bc.offsetWidth; bc.classList.add('beat'); if (navigator.vibrate) try { navigator.vibrate(40); } catch(e){} }
+  }
+  lastSec = sec;
+}
+function finalReset(){ lastSec = null; $('#app').classList.remove('final','final10'); $('#bigCount').hidden = true; }
 function endGame(win, reason){
   if (S.over) return;
   stopAll();
